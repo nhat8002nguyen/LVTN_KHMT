@@ -1,5 +1,7 @@
 package com.nhatnv.lvtn.lvtn.configurations;
 
+import java.util.Arrays;
+
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,17 +15,19 @@ public class DevConfig {
 	@Bean
 	public ApplicationRunner dataLoader(UserRepository userRepo, PasswordEncoder encoder) {
 		return args -> {
-			userRepo.save(
-					new User(
-							"user@gmail.com",
-							"Nhat Nguyen",
-							encoder.encode("password")));
+			User user1 = User.builder()
+					.username("customer1")
+					.password(encoder.encode("customer1"))
+					.role("ROLE_USER")
+					.build();
 
-			userRepo.save(
-					new User(
-							"user1@gmail.com",
-							"Anh Nguyen",
-							encoder.encode("password1")));
+			User user2 = User.builder()
+					.username("admin")
+					.password(encoder.encode("admin"))
+					.role("ROLE_ADMIN")
+					.build();
+
+			userRepo.saveAll(Arrays.asList(user1, user2));
 		};
 	}
 

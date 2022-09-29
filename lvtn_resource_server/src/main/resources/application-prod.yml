@@ -1,0 +1,16 @@
+# spring:
+#   jpa:
+#     hibernate:
+#       ddl-auto: none
+#   datasource:
+#     username: lvtnuser
+#     password: 200899_Mysql
+#   cloud:
+#     gcp:
+#       sql:
+#         database-name: service_social_media_DB
+#         instance-connection-name: service-social-media-lvtn:asia-southeast1:lvtn2022
+#   sql:
+#     init:
+#       continue-on-error: true
+#       mode: always

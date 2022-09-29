@@ -1,0 +1,12 @@
+server:
+  port: 8080
+spring:
+  profiles:
+    active:
+      - dev
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://auth-server:9001
+          jwk-set-uri: http://localhost:9001/oauth2/jwks

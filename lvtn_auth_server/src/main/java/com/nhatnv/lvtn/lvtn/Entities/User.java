@@ -17,6 +17,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,8 @@ import lombok.RequiredArgsConstructor;
 @Data
 @NoArgsConstructor(access = AccessLevel.PRIVATE, force = true)
 @RequiredArgsConstructor
+@Builder
+@AllArgsConstructor
 public class User implements UserDetails {
 	public static long serialVersionUID = 1L;
 
@@ -50,8 +54,13 @@ public class User implements UserDetails {
 
 	private String imageUrl;
 
+	private final String role;
+
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
+		if (role == "ROLE_USER" || role == "ROLE_ADMIN") {
+			return Collections.singletonList(new SimpleGrantedAuthority(role));
+		}
 		return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
 	}
 

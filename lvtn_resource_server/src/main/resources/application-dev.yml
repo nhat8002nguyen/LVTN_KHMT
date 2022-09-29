@@ -1,0 +1,12 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none
+  datasource:
+    url: jdbc:mysql://localhost:3306/service_social_media_DB
+    username: lvtnuser
+    password: 200899_Mysql
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  # sql:
+  #   init:
+  #     mode: always

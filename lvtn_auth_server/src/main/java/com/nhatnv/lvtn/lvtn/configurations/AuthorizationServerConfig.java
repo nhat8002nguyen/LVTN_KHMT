@@ -47,28 +47,46 @@ public class AuthorizationServerConfig {
 	@Bean
 	public RegisteredClientRepository registeredClientRepository(
 			PasswordEncoder passwordEncoder) {
-		RegisteredClient registeredClient = RegisteredClient.withId(UUID.randomUUID().toString())
-				.clientId("taco-admin-client")
-				.clientSecret(passwordEncoder.encode("secret"))
+		RegisteredClient registeredAdminClient = RegisteredClient.withId(UUID.randomUUID().toString())
+				.clientId("service-social-media-admin-client")
+				.clientSecret(passwordEncoder.encode("adminSecret"))
 				.clientAuthenticationMethod(
 						ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
 				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
 				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
 				.redirectUri(
-						"http://127.0.0.1:9090/login/oauth2/code/taco-admin-client")
-				.scope("writePosts")
-				.scope("deletePosts")
+						"http://127.0.0.1:9090/login/oauth2/code/service-social-media-admin-client")
+				.scope("posts.delete")
+				.scope("posts.read")
+				.scope("users.delete")
 				.scope(OidcScopes.OPENID)
 				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
 				.build();
-		return new InMemoryRegisteredClientRepository(registeredClient);
+
+		RegisteredClient registeredCustomerClient = RegisteredClient.withId(UUID.randomUUID().toString())
+				.clientId("service-social-media-customer-client")
+				.clientSecret(passwordEncoder.encode("clientSecret"))
+				.clientAuthenticationMethod(
+						ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+				.redirectUri("http://127.0.0.1:9090/login/oauth2/code/service-social-media-customer-client")
+				.scope("posts.write")
+				.scope("posts.read")
+				.scope(OidcScopes.OPENID)
+				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
+				.build();
+
+		return new InMemoryRegisteredClientRepository(
+				registeredAdminClient,
+				registeredCustomerClient);
 	}
 
 	@Bean
 	ProviderSettings providerSettings() {
 		return ProviderSettings
 				.builder()
-				.issuer("http://auth-server:9000")
+				.issuer("http://localhost:9001")
 				.build();
 	}
 
