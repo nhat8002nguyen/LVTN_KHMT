@@ -3,11 +3,8 @@ package com.lvtn.resource_server.lvtn_resource_server.domains.posts.pojos;
 import lombok.Data;
 
 @Data
-public class PropertyAmenity {
+public class PostImage {
 	private long id;
 
-	private String icon;
-
-	private String description;
-
+	private String url;
 }

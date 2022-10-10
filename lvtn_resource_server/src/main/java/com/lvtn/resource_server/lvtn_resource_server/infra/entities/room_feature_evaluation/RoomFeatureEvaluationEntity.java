@@ -6,23 +6,25 @@ import javax.persistence.IdClass;
 import javax.persistence.ManyToOne;
 import javax.validation.constraints.NotNull;
 
-import com.lvtn.resource_server.lvtn_resource_server.infra.entities.RoomFeature;
-import com.lvtn.resource_server.lvtn_resource_server.infra.entities.service_evaluation_post.ServiceEvaluationPost;
+import com.lvtn.resource_server.lvtn_resource_server.infra.entities.RoomFeatureEntity;
+import com.lvtn.resource_server.lvtn_resource_server.infra.entities.ServiceEvaluationPostEntity;
 
 import lombok.Data;
 
 @Entity(name = "room_features_evaluation")
 @Data
-@IdClass(RoomFeatureEvaluationId.class)
-public class RoomFeatureEvaluation {
+@IdClass(RoomFeatureEvaluationEntityId.class)
+public class RoomFeatureEvaluationEntity {
 	@Id
 	@ManyToOne
-	private ServiceEvaluationPost serviceEvaluation;
+	private ServiceEvaluationPostEntity serviceEvaluation;
 
 	@Id
 	@ManyToOne
-	private RoomFeature roomFeature;
+	private RoomFeatureEntity roomFeature;
 
 	@NotNull
 	private float score;
+
+	private String note;
 }

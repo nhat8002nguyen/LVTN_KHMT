@@ -1,11 +1,13 @@
-package com.lvtn.resource_server.lvtn_resource_server.infra.entities.service_evaluation_post;
+package com.lvtn.resource_server.lvtn_resource_server.infra.entities;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -18,23 +20,24 @@ import javax.validation.constraints.Size;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.lvtn.resource_server.lvtn_resource_server.infra.entities.Hotel;
-import com.lvtn.resource_server.lvtn_resource_server.infra.entities.User;
+import com.lvtn.resource_server.lvtn_resource_server.domains.posts.pojos.ServiceEvaluationPost.PostVisibility;
 
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity(name = "service_evaluation_posts")
 @Data
 @NoArgsConstructor(access = AccessLevel.PRIVATE, force = true)
-public class ServiceEvaluationPost {
+@AllArgsConstructor
+public class ServiceEvaluationPostEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
 
 	@ManyToOne
-	private User user;
+	private UserEntity user;
 
 	@Size(max = 500, message = "The title of the post must be at most 500 chracter long")
 	private String title;
@@ -44,26 +47,29 @@ public class ServiceEvaluationPost {
 	@Size(max = 10000, message = "The description of the post must be at most 10000 character long")
 	private String body;
 
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "post")
-	private List<PostImage> postImages = new ArrayList<>();
+	@OneToMany(cascade = CascadeType.ALL)
+	private Set<PostImageEntity> postImages = new HashSet<>();
 
 	@NotNull
 	@ManyToOne
-	private Hotel hotel;
+	private HotelEntity hotel;
 
-	private float locationRating;
+	private double locationRating;
 
-	private float cleanlinessRating;
+	private double cleanlinessRating;
 
-	private float serviceRating;
+	private double serviceRating;
 
-	private float valueRating;
+	private double valueRating;
 
 	private int likedCount;
 
 	private int dislikedCount;
 
 	private int sharedCount;
+
+	@Enumerated(EnumType.STRING)
+	private PostVisibility visibility;
 
 	@CreationTimestamp
 	private Date createdAt;

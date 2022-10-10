@@ -8,13 +8,15 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity(name = "property_amenities")
 @Data
 @NoArgsConstructor(access = AccessLevel.PRIVATE, force = true)
-public class PropertyAmenity {
+@AllArgsConstructor
+public class PropertyAmenityEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;

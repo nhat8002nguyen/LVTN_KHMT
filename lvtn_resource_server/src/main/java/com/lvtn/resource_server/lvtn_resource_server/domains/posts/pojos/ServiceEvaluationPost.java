@@ -1,17 +1,11 @@
-package com.lvtn.resource_server.lvtn_resource_server.domains.posts.pojos.service_evaluation_post;
+package com.lvtn.resource_server.lvtn_resource_server.domains.posts.pojos;
 
 import java.util.Date;
 import java.util.List;
 
-import com.lvtn.resource_server.lvtn_resource_server.domains.posts.pojos.User;
-import com.lvtn.resource_server.lvtn_resource_server.infra.entities.Hotel;
-
-import lombok.AccessLevel;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor(access = AccessLevel.PRIVATE, force = true)
 public class ServiceEvaluationPost {
 	private long id;
 
@@ -39,7 +33,18 @@ public class ServiceEvaluationPost {
 
 	private int sharedCount;
 
+	private List<PropertyAmenityEvaluation> propertyAmenityEvaluations;
+
+	private List<RoomFeatureEvaluation> roomFeatureEvaluations;
+
+	private PostVisibility visibility;
+
 	private Date createdAt;
 
 	private Date updatedAt;
+
+	public enum PostVisibility {
+		PRIVATE,
+		PUBLIC
+	}
 }

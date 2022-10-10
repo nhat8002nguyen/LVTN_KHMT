@@ -9,27 +9,39 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity(name = "hotels")
+@Entity(name = "users")
 @Data
 @NoArgsConstructor(access = AccessLevel.PRIVATE, force = true)
-public class Hotel {
+@AllArgsConstructor
+public class UserEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
 
 	@NotNull
 	@NotBlank
-	@Size(max = 100)
-	private String name;
+	@Size(max = 50, message = "First name should has at most 50 charactor long")
+	private String firstName;
 
-	@Size(max = 500)
-	private String location;
+	@Size(max = 50, message = "First name should has at most 50 charactor long")
+	@NotNull
+	@NotBlank
+	private String lastName;
 
-	@Size(max = 1000)
+	@NotNull
+	private String email;
+
+	@NotNull
+	private String password;
+
+	private String phone;
+
+	@Size(max = 10000, message = "User's About must be at most 10000 character long")
 	private String about;
 
-	private float rating;
+	private String imageUrl;
 }
