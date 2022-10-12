@@ -17,7 +17,8 @@ public class UserPostServiceImpl implements UserPostService, PostDelectionServic
 
 	private static final int TRENDING_POST_MAX = 100;
 
-	public UserPostServiceImpl(PostRepository postRepository) {
+	public UserPostServiceImpl(
+			PostRepository postRepository) {
 		this.postRepository = postRepository;
 	}
 
@@ -57,13 +58,13 @@ public class UserPostServiceImpl implements UserPostService, PostDelectionServic
 
 	@Override
 	public ServiceEvaluationPost updatePost(long postId, ServiceEvaluationPost post) {
-		ServiceEvaluationPost targetPost = postRepository.findPost(postId);
+		ServiceEvaluationPost existingPost = postRepository.findPost(postId);
 
-		if (targetPost == null) {
+		if (existingPost == null) {
 			throw new PostNotFoundException();
 		}
 
-		ServiceEvaluationPost updatedPost = postRepository.updatePost(postId, targetPost);
+		ServiceEvaluationPost updatedPost = postRepository.updatePost(postId, post);
 
 		return updatedPost;
 	}

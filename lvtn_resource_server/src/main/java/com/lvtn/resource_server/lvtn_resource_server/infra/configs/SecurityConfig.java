@@ -22,6 +22,7 @@ public class SecurityConfig {
 		return http.authorizeHttpRequests(
 				authorize -> authorize
 						.anyRequest().permitAll())
+				.csrf().disable()
 				// .antMatchers(HttpMethod.GET, "/data-api/posts").permitAll()
 				// .antMatchers(HttpMethod.POST,
 				// "/data-api/posts").hasAuthority("SCOPE_writePosts")

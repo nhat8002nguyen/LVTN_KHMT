@@ -12,29 +12,19 @@ import org.springframework.stereotype.Component;
 import com.lvtn.resource_server.lvtn_resource_server.domains.posts.pojos.ServiceEvaluationPost;
 import com.lvtn.resource_server.lvtn_resource_server.domains.posts.repositories.post_repository.PostRepository;
 import com.lvtn.resource_server.lvtn_resource_server.infra.entities.ServiceEvaluationPostEntity;
-import com.lvtn.resource_server.lvtn_resource_server.infra.entities.property_amenity_evaluation.PropertyAmenityEvaluationEntity;
-import com.lvtn.resource_server.lvtn_resource_server.infra.entities.room_feature_evaluation.RoomFeatureEvaluationEntity;
 import com.lvtn.resource_server.lvtn_resource_server.infra.mappers.post.PostMappers;
-import com.lvtn.resource_server.lvtn_resource_server.infra.repositories.jpa.property_amenity_evaluation.JPAPropertyAmenityEvaluationRepository;
-import com.lvtn.resource_server.lvtn_resource_server.infra.repositories.jpa.room_feature_evaluation.JPARoomFeatureEvaluationRepository;
 
 @Component
 public class PostRepositoryImpl implements PostRepository {
 
 	private JPAPostRepository repository;
 	private PostMappers postMapper;
-	private JPAPropertyAmenityEvaluationRepository propertyAmenityEvaluationRepository;
-	private JPARoomFeatureEvaluationRepository roomFeatureEvaluationRepository;
 
 	@Autowired
 	public PostRepositoryImpl(
-			JPAPostRepository repository,
-			JPAPropertyAmenityEvaluationRepository propertyAmenityEvaluationRepository,
-			JPARoomFeatureEvaluationRepository roomFeatureEvaluationRepository) {
+			JPAPostRepository repository) {
 		this.repository = repository;
 		this.postMapper = PostMappers.INSTANCE;
-		this.propertyAmenityEvaluationRepository = propertyAmenityEvaluationRepository;
-		this.roomFeatureEvaluationRepository = roomFeatureEvaluationRepository;
 	}
 
 	@Override
@@ -42,21 +32,8 @@ public class PostRepositoryImpl implements PostRepository {
 		ServiceEvaluationPostEntity entity = postMapper.serviceEvaluationPostToEntity(post);
 		ServiceEvaluationPostEntity savedPostEntity = repository.save(entity);
 
-		List<PropertyAmenityEvaluationEntity> propertyAmenityEvaluations = post.getPropertyAmenityEvaluations().stream()
-				.map(
-						item -> postMapper.propertyAmenityEvaluationPojoToEntity(post, item))
-				.collect(Collectors.toList());
-
-		List<RoomFeatureEvaluationEntity> roomFeatureEvaluations = post.getRoomFeatureEvaluations().stream()
-				.map(
-						item -> postMapper.roomFeatureEvaluationToEntity(item, post))
-				.collect(Collectors.toList());
-
-		propertyAmenityEvaluationRepository.saveAll(propertyAmenityEvaluations);
-		roomFeatureEvaluationRepository.saveAll(roomFeatureEvaluations);
-
 		return postMapper.serviceEvaluationPostEntityToPojo(
-				savedPostEntity, propertyAmenityEvaluations, roomFeatureEvaluations);
+				savedPostEntity);
 	}
 
 	@Override
@@ -76,23 +53,8 @@ public class PostRepositoryImpl implements PostRepository {
 		entity.setId(postId);
 		entity = repository.save(entity);
 
-		List<PropertyAmenityEvaluationEntity> propertyAmenityEvaluations = post.getPropertyAmenityEvaluations().stream()
-				.map(
-						item -> postMapper.propertyAmenityEvaluationPojoToEntity(post, item))
-				.collect(Collectors.toList());
-
-		List<RoomFeatureEvaluationEntity> roomFeatureEvaluations = post.getRoomFeatureEvaluations().stream()
-				.map(
-						item -> postMapper.roomFeatureEvaluationToEntity(item, post))
-				.collect(Collectors.toList());
-
-		propertyAmenityEvaluationRepository.saveAll(propertyAmenityEvaluations);
-		roomFeatureEvaluationRepository.saveAll(roomFeatureEvaluations);
-
 		ServiceEvaluationPost result = postMapper.serviceEvaluationPostEntityToPojo(
-				entity,
-				propertyAmenityEvaluations,
-				roomFeatureEvaluations);
+				entity);
 		return result;
 	}
 
@@ -100,9 +62,9 @@ public class PostRepositoryImpl implements PostRepository {
 	public List<ServiceEvaluationPost> findRecentPosts(int size, int page) {
 		Pageable pageable = PageRequest.of(page, size);
 
-		List<ServiceEvaluationPostEntity> entites = repository.findByOrderByCreatedAtDesc(pageable);
+		List<ServiceEvaluationPostEntity> entities = repository.findByOrderByCreatedAtDesc(pageable);
 
-		return getServiceEvaluationPostPojosFromEntities(entites);
+		return entities.stream().map(postMapper::serviceEvaluationPostEntityToPojo).collect(Collectors.toList());
 	}
 
 	@Override
@@ -115,28 +77,14 @@ public class PostRepositoryImpl implements PostRepository {
 
 		ServiceEvaluationPostEntity entity = optional.get();
 
-		return getServiceEvaluationPostPojoFromEntity(entity);
+		return postMapper.serviceEvaluationPostEntityToPojo(entity);
 	}
 
 	@Override
 	public List<ServiceEvaluationPost> findPostsByUserId(long userId, int size, int page) {
 		Pageable pageable = PageRequest.of(page, size);
 		List<ServiceEvaluationPostEntity> entities = repository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
-		return getServiceEvaluationPostPojosFromEntities(entities);
-	}
-
-	private List<ServiceEvaluationPost> getServiceEvaluationPostPojosFromEntities(
-			List<ServiceEvaluationPostEntity> entities) {
-		return entities.stream().map(e -> getServiceEvaluationPostPojoFromEntity(e)).collect(Collectors.toList());
-	}
-
-	private ServiceEvaluationPost getServiceEvaluationPostPojoFromEntity(ServiceEvaluationPostEntity entity) {
-		List<PropertyAmenityEvaluationEntity> propertyAmenityEvaluations = propertyAmenityEvaluationRepository
-				.findByServiceEvaluationId(entity.getId());
-		List<RoomFeatureEvaluationEntity> roomFeatureEvaluations = roomFeatureEvaluationRepository
-				.findByServiceEvaluationId(entity.getId());
-
-		return postMapper.serviceEvaluationPostEntityToPojo(entity, propertyAmenityEvaluations, roomFeatureEvaluations);
+		return entities.stream().map(postMapper::serviceEvaluationPostEntityToPojo).collect(Collectors.toList());
 	}
 
 	@Override

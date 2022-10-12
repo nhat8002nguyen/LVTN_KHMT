@@ -19,23 +19,19 @@ public class ServiceEvaluationPost {
 
 	private Hotel hotel;
 
-	private float locationRating;
+	private double locationRating;
 
-	private float cleanlinessRating;
+	private double cleanlinessRating;
 
-	private float serviceRating;
+	private double serviceRating;
 
-	private float valueRating;
+	private double valueRating;
 
 	private int likedCount;
 
 	private int dislikedCount;
 
 	private int sharedCount;
-
-	private List<PropertyAmenityEvaluation> propertyAmenityEvaluations;
-
-	private List<RoomFeatureEvaluation> roomFeatureEvaluations;
 
 	private PostVisibility visibility;
 

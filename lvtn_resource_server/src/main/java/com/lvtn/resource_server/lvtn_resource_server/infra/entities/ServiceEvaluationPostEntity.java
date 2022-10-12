@@ -36,7 +36,7 @@ public class ServiceEvaluationPostEntity {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
 
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.MERGE)
 	private UserEntity user;
 
 	@Size(max = 500, message = "The title of the post must be at most 500 chracter long")
@@ -51,7 +51,7 @@ public class ServiceEvaluationPostEntity {
 	private Set<PostImageEntity> postImages = new HashSet<>();
 
 	@NotNull
-	@ManyToOne
+	@ManyToOne(cascade = CascadeType.MERGE)
 	private HotelEntity hotel;
 
 	private double locationRating;

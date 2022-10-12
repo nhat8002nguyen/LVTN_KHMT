@@ -14,6 +14,6 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor
-public class RecentPostsResponse extends BaseResponse<RecentPostsResponse> {
+public class RecentPostsResponseDto extends BaseResponseDto<RecentPostsResponseDto> {
 	private List<ServiceEvaluationPost> serviceEvaluationPosts;
 }
