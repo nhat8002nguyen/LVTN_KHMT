@@ -1,10 +1,14 @@
 package com.lvtn.resource_server.lvtn_resource_server.infra.configs;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtDecoders;
 import org.springframework.security.web.SecurityFilterChain;
 
 import com.lvtn.resource_server.lvtn_resource_server.infra.common.props.JwtIssuerProps;
@@ -13,6 +17,7 @@ import com.lvtn.resource_server.lvtn_resource_server.infra.common.props.JwtIssue
 public class SecurityConfig {
 	private JwtIssuerProps jwtIssuerProps;
 
+	@Autowired
 	public SecurityConfig(JwtIssuerProps jwtIssuerProps) {
 		this.jwtIssuerProps = jwtIssuerProps;
 	}
@@ -21,16 +26,19 @@ public class SecurityConfig {
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		return http.authorizeHttpRequests(
 				authorize -> authorize
-						.anyRequest().permitAll())
+						// .anyRequest().permitAll())
+						.antMatchers(HttpMethod.GET, "/api/v1/posts/*")
+						.hasAuthority("SCOPE_posts.read")
+						.antMatchers(HttpMethod.POST,
+								"/api/v1/posts")
+						.hasAuthority("SCOPE_posts.write")
+						.antMatchers(HttpMethod.DELETE,
+								"/api/v1/posts")
+						.hasAuthority("SCOPE_posts.write")
+						.anyRequest()
+						.authenticated())
+				.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder())))
 				.csrf().disable()
-				// .antMatchers(HttpMethod.GET, "/data-api/posts").permitAll()
-				// .antMatchers(HttpMethod.POST,
-				// "/data-api/posts").hasAuthority("SCOPE_writePosts")
-				// .antMatchers(HttpMethod.DELETE,
-				// "/data-api/posts").hasAuthority("SCOPE_deletePosts")
-				// .anyRequest()
-				// .authenticated())
-				// .oauth2ResourceServer(oauth2 -> oauth2.jwt())
 				.build();
 	}
 
@@ -39,8 +47,8 @@ public class SecurityConfig {
 		return new BCryptPasswordEncoder();
 	}
 
-	// @Bean
-	// public JwtDecoder jwtDecoder() {
-	// return JwtDecoders.fromIssuerLocation(jwtIssuerProps.getIssuerUri());
-	// }
+	@Bean
+	public JwtDecoder jwtDecoder() {
+		return JwtDecoders.fromIssuerLocation(jwtIssuerProps.getIssuerUri());
+	}
 }

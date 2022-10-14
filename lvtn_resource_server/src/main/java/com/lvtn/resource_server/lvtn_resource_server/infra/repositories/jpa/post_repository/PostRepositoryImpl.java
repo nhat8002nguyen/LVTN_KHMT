@@ -1,11 +1,8 @@
 package com.lvtn.resource_server.lvtn_resource_server.infra.repositories.jpa.post_repository;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -133,13 +130,10 @@ public class PostRepositoryImpl implements PostRepository {
 	}
 
 	@Override
-	public ServiceEvaluationPost updatePostImages(long id, Set<PostImage> images) {
+	public ServiceEvaluationPost updatePostImages(long id, List<PostImage> images) {
 		ServiceEvaluationPostEntity entity = getPostEntityOrThrowException(id);
-		Set<PostImageEntity> imageEntities = new HashSet<>();
-		Iterator<PostImage> iterator = images.iterator();
-		while (iterator.hasNext()) {
-			imageEntities.add(postMapper.postImageToPostImageEntity(iterator.next()));
-		}
+		List<PostImageEntity> imageEntities = images.stream().map(image -> postMapper.postImageToPostImageEntity(image))
+				.collect(Collectors.toList());
 		entity.setPostImages(imageEntities);
 		repository.save(entity);
 		return postMapper.serviceEvaluationPostEntityToPojo(entity);

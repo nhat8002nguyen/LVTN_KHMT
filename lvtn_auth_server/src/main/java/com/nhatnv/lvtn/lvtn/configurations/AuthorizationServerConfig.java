@@ -5,6 +5,7 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.time.Duration;
 import java.util.UUID;
 
 import org.springframework.context.annotation.Bean;
@@ -24,6 +25,7 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.config.ProviderSettings;
+import org.springframework.security.oauth2.server.authorization.config.TokenSettings;
 import org.springframework.security.web.SecurityFilterChain;
 
 import com.nimbusds.jose.jwk.JWKSet;
@@ -75,11 +77,17 @@ public class AuthorizationServerConfig {
 				.scope("posts.read")
 				.scope(OidcScopes.OPENID)
 				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(true).build())
+				.tokenSettings(tokenSettings())
 				.build();
 
 		return new InMemoryRegisteredClientRepository(
 				registeredAdminClient,
 				registeredCustomerClient);
+	}
+
+	@Bean
+	TokenSettings tokenSettings() {
+		return TokenSettings.builder().accessTokenTimeToLive(Duration.ofMinutes(120)).build();
 	}
 
 	@Bean

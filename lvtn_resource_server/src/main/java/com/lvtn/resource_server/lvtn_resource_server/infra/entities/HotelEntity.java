@@ -1,9 +1,13 @@
 package com.lvtn.resource_server.lvtn_resource_server.infra.entities;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -34,4 +38,7 @@ public class HotelEntity {
 	private String about;
 
 	private double rating;
+
+	@OneToMany(mappedBy = "hotel")
+	private List<ServiceEvaluationPostEntity> serviceEvaluationPosts = new ArrayList<>();
 }

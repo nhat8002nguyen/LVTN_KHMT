@@ -1,7 +1,6 @@
 package com.lvtn.resource_server.lvtn_resource_server.domains.posts.concrete_services;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.lvtn.resource_server.lvtn_resource_server.domains.posts.pojos.Hotel;
@@ -92,7 +91,7 @@ public class UserPostServiceImpl implements UserPostService, PostDelectionServic
 	}
 
 	@Override
-	public ServiceEvaluationPost updatePostImages(long id, Set<PostImage> images) {
+	public ServiceEvaluationPost updatePostImages(long id, List<PostImage> images) {
 		return postRepository.updatePostImages(id, images);
 	}
 

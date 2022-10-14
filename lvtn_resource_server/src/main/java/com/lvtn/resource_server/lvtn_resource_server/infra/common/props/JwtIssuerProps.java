@@ -9,5 +9,5 @@ import lombok.Data;
 @Component
 @ConfigurationProperties(prefix = "spring.security.oauth2.resouceserver.jwt")
 public class JwtIssuerProps {
-	private String issuerUri = "http://auth-server:9001/.well-known/oauth-authorization-server";
+	private String issuerUri = "http://localhost:9001";
 }

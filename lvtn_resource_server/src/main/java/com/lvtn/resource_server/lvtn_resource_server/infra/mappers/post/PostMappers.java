@@ -2,7 +2,10 @@ package com.lvtn.resource_server.lvtn_resource_server.infra.mappers.post;
 
 import java.util.List;
 
+import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
 
 import com.lvtn.resource_server.lvtn_resource_server.domains.posts.pojos.Hotel;
@@ -15,25 +18,33 @@ import com.lvtn.resource_server.lvtn_resource_server.infra.entities.ServiceEvalu
 import com.lvtn.resource_server.lvtn_resource_server.infra.entities.UserEntity;
 
 @Mapper
-public interface PostMappers {
+public abstract class PostMappers {
 	public static PostMappers INSTANCE = Mappers.getMapper(PostMappers.class);
 
-	ServiceEvaluationPost serviceEvaluationPostEntityToPojo(
+	public abstract ServiceEvaluationPost serviceEvaluationPostEntityToPojo(
 			ServiceEvaluationPostEntity serviceEvaluation);
 
-	ServiceEvaluationPostEntity serviceEvaluationPostToEntity(ServiceEvaluationPost post);
+	@AfterMapping
+	protected void setAssociatedPostForImages(ServiceEvaluationPost serviceEvaluationPost,
+			@MappingTarget ServiceEvaluationPostEntity serviceEvaluationPostEntity) {
+		List<PostImageEntity> imageEntities = serviceEvaluationPostEntity.getPostImages();
+		imageEntities.forEach(entity -> entity.setServiceEvaluationPost(serviceEvaluationPostEntity));
+	}
 
-	PostImage postImageEntityPostImage(PostImageEntity postImageEntity);
+	public abstract ServiceEvaluationPostEntity serviceEvaluationPostToEntity(ServiceEvaluationPost post);
 
-	PostImageEntity postImageToPostImageEntity(PostImage postImage);
+	public abstract PostImage postImageEntityPostImage(PostImageEntity postImageEntity);
 
-	HotelEntity hotelToHotelEntity(Hotel hotel);
+	@Mapping(target = "serviceEvaluationPost", ignore = true)
+	public abstract PostImageEntity postImageToPostImageEntity(PostImage postImage);
 
-	Hotel hotelEntityToHotel(HotelEntity entity);
+	@Mapping(target = "serviceEvaluationPosts", ignore = true)
+	public abstract HotelEntity hotelToHotelEntity(Hotel hotel);
 
-	UserEntity userToUserEntity(User user, List<ServiceEvaluationPost> serviceEvaluationPosts);
+	public abstract Hotel hotelEntityToHotel(HotelEntity entity);
 
-	User userEntityToUser(UserEntity entity);
+	@Mapping(target = "serviceEvaluationPosts", ignore = true)
+	public abstract UserEntity userToUserEntity(User user);
 
-	UserEntity userToUserEntity(User user);
+	public abstract User userEntityToUser(UserEntity entity);
 }

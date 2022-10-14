@@ -1,8 +1,7 @@
 package com.lvtn.resource_server.lvtn_resource_server.infra.entities;
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -36,7 +35,7 @@ public class ServiceEvaluationPostEntity {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private long id;
 
-	@ManyToOne(cascade = CascadeType.MERGE)
+	@ManyToOne
 	private UserEntity user;
 
 	@Size(max = 500, message = "The title of the post must be at most 500 chracter long")
@@ -47,11 +46,10 @@ public class ServiceEvaluationPostEntity {
 	@Size(max = 10000, message = "The description of the post must be at most 10000 character long")
 	private String body;
 
-	@OneToMany(cascade = CascadeType.ALL)
-	private Set<PostImageEntity> postImages = new HashSet<>();
+	@OneToMany(mappedBy = "serviceEvaluationPost", cascade = CascadeType.PERSIST)
+	private List<PostImageEntity> postImages;
 
-	@NotNull
-	@ManyToOne(cascade = CascadeType.MERGE)
+	@ManyToOne
 	private HotelEntity hotel;
 
 	private double locationRating;

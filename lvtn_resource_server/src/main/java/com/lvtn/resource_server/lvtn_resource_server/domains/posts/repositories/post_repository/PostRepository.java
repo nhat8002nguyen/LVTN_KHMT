@@ -1,7 +1,6 @@
 package com.lvtn.resource_server.lvtn_resource_server.domains.posts.repositories.post_repository;
 
 import java.util.List;
-import java.util.Set;
 
 import com.lvtn.resource_server.lvtn_resource_server.domains.posts.pojos.Hotel;
 import com.lvtn.resource_server.lvtn_resource_server.domains.posts.pojos.PostImage;
@@ -29,7 +28,7 @@ public interface PostRepository {
 
 	ServiceEvaluationPost updatePostBody(long id, String body);
 
-	ServiceEvaluationPost updatePostImages(long id, Set<PostImage> images);
+	ServiceEvaluationPost updatePostImages(long id, List<PostImage> images);
 
 	ServiceEvaluationPost updatePostHotel(long id, Hotel hotel);
 

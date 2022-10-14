@@ -20,6 +20,8 @@ public class User {
 
 	private String about;
 
+	private String role;
+
 	private String imageUrl;
 
 }

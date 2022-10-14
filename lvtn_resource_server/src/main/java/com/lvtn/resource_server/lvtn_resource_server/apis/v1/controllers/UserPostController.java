@@ -1,9 +1,7 @@
 package com.lvtn.resource_server.lvtn_resource_server.apis.v1.controllers;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +31,7 @@ import com.lvtn.resource_server.lvtn_resource_server.domains.posts.services.User
 import com.lvtn.resource_server.lvtn_resource_server.infra.configs.BeanConfigs.Role;
 
 @RestController
-@RequestMapping(path = "/api/v1/", produces = "application/json")
+@RequestMapping(path = "/api/v1", produces = "application/json")
 @CrossOrigin
 public class UserPostController {
 
@@ -52,7 +50,7 @@ public class UserPostController {
 
 	@GetMapping(path = "/posts/recent")
 	public ResponseEntity<?> recentPublicPosts() {
-		List<ServiceEvaluationPost> posts = userPostService.getNewFeeds(3);
+		List<ServiceEvaluationPost> posts = userPostService.getNewFeeds(1);
 
 		if (posts == null) {
 			BaseResponseDto<?> response = BaseResponseDto.ofFail(
@@ -155,9 +153,7 @@ public class UserPostController {
 	@PatchMapping(path = "/posts/{id}/post_images")
 	public ResponseEntity<?> updatePostImages(@PathVariable long id, @RequestBody List<PostImage> postImages) {
 		try {
-			Set<PostImage> imageSet = new HashSet<>();
-			postImages.forEach(image -> imageSet.add(image));
-			ServiceEvaluationPost updatedPost = userPostService.updatePostImages(id, imageSet);
+			ServiceEvaluationPost updatedPost = userPostService.updatePostImages(id, postImages);
 			return ResponseEntity.ok(updatedPost);
 		} catch (RuntimeException e) {
 			return ResponseEntity.badRequest()
