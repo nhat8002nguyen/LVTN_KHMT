@@ -29,7 +29,7 @@ public interface PostMappers {
 
 	HotelEntity hotelToHotelEntity(Hotel hotel);
 
-	Hotel hoteEntityToHotel(HotelEntity entity);
+	Hotel hotelEntityToHotel(HotelEntity entity);
 
 	UserEntity userToUserEntity(User user, List<ServiceEvaluationPost> serviceEvaluationPosts);
 

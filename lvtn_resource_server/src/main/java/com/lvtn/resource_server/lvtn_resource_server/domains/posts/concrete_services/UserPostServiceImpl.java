@@ -1,9 +1,11 @@
 package com.lvtn.resource_server.lvtn_resource_server.domains.posts.concrete_services;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.lvtn.resource_server.lvtn_resource_server.domains.posts.exceptions.PostNotFoundException;
+import com.lvtn.resource_server.lvtn_resource_server.domains.posts.pojos.Hotel;
+import com.lvtn.resource_server.lvtn_resource_server.domains.posts.pojos.PostImage;
 import com.lvtn.resource_server.lvtn_resource_server.domains.posts.pojos.ServiceEvaluationPost;
 import com.lvtn.resource_server.lvtn_resource_server.domains.posts.pojos.ServiceEvaluationPost.PostVisibility;
 import com.lvtn.resource_server.lvtn_resource_server.domains.posts.repositories.post_repository.PostRepository;
@@ -58,15 +60,7 @@ public class UserPostServiceImpl implements UserPostService, PostDelectionServic
 
 	@Override
 	public ServiceEvaluationPost updatePost(long postId, ServiceEvaluationPost post) {
-		ServiceEvaluationPost existingPost = postRepository.findPost(postId);
-
-		if (existingPost == null) {
-			throw new PostNotFoundException();
-		}
-
-		ServiceEvaluationPost updatedPost = postRepository.updatePost(postId, post);
-
-		return updatedPost;
+		return postRepository.updatePost(postId, post);
 	}
 
 	@Override
@@ -80,6 +74,66 @@ public class UserPostServiceImpl implements UserPostService, PostDelectionServic
 		return posts.stream()
 				.filter(p -> p.getVisibility() == PostVisibility.PUBLIC)
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<Hotel> getHotels() {
+		return postRepository.findAllHotels();
+	}
+
+	@Override
+	public ServiceEvaluationPost updatePostTitle(long id, String title) {
+		return postRepository.updatePostTitle(id, title);
+	}
+
+	@Override
+	public ServiceEvaluationPost updatePostBody(long id, String body) {
+		return postRepository.updatePostBody(id, body);
+	}
+
+	@Override
+	public ServiceEvaluationPost updatePostImages(long id, Set<PostImage> images) {
+		return postRepository.updatePostImages(id, images);
+	}
+
+	@Override
+	public ServiceEvaluationPost updatePostHotel(long id, Hotel hotel) {
+		return postRepository.updatePostHotel(id, hotel);
+	}
+
+	@Override
+	public ServiceEvaluationPost updatePostCleanlinessRating(long id, double cleanlinessRating) {
+		return postRepository.updatePostCleanlinessRating(id, cleanlinessRating);
+	}
+
+	@Override
+	public ServiceEvaluationPost updatePostServiceRating(long id, double serviceRating) {
+		return postRepository.updatePostServiceRating(id, serviceRating);
+	}
+
+	@Override
+	public ServiceEvaluationPost updatePostLocationRating(long id, double valueRating) {
+		return postRepository.updatePostLocationRating(id, valueRating);
+	}
+
+	@Override
+	public ServiceEvaluationPost updatePostLikedCount(long id, int likedCount) {
+		return postRepository.updatePostLikedCount(id, likedCount);
+	}
+
+	@Override
+	public ServiceEvaluationPost updatePostDislikedCount(long id, int dislikedCount) {
+		return updatePostDislikedCount(id, dislikedCount);
+	}
+
+	@Override
+	public ServiceEvaluationPost updatePostSharedCount(long id, int sharedCount) {
+		return postRepository.updatePostSharedCount(id, sharedCount);
+	}
+
+	@Override
+	public ServiceEvaluationPost updatePostVisibility(long id, PostVisibility visibility) {
+		return postRepository.updatePostVisibility(id, visibility);
 	}
 
 }

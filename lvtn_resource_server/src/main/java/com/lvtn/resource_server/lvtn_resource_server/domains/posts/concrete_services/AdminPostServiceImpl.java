@@ -3,7 +3,6 @@ package com.lvtn.resource_server.lvtn_resource_server.domains.posts.concrete_ser
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.lvtn.resource_server.lvtn_resource_server.domains.posts.exceptions.PostNotFoundException;
 import com.lvtn.resource_server.lvtn_resource_server.domains.posts.pojos.ServiceEvaluationPost;
 import com.lvtn.resource_server.lvtn_resource_server.domains.posts.repositories.post_repository.PostRepository;
 import com.lvtn.resource_server.lvtn_resource_server.domains.posts.services.AdminPostService;
@@ -35,12 +34,6 @@ public class AdminPostServiceImpl implements AdminPostService, PostDelectionServ
 
 	@Override
 	public Boolean deletePost(long postId) {
-		ServiceEvaluationPost target = postRepository.findPost(postId);
-
-		if (target == null) {
-			throw new PostNotFoundException();
-		}
-
 		postRepository.deletePost(postId);
 
 		return true;
