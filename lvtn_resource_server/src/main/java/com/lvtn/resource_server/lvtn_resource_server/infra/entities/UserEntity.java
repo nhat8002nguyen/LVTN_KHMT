@@ -24,6 +24,10 @@ public class UserEntity {
 
 	@NotNull
 	@NotBlank
+	private String username;
+
+	@NotNull
+	@NotBlank
 	@Size(max = 50, message = "First name should has at most 50 charactor long")
 	private String firstName;
 
@@ -44,4 +48,6 @@ public class UserEntity {
 	private String about;
 
 	private String imageUrl;
+
+	private final String role;
 }
