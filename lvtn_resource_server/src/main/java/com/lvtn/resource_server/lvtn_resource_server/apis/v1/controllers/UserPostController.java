@@ -73,23 +73,6 @@ public class UserPostController {
 				BaseResponseDto.ofSucceed(postResponse, ResponseCode.POST_RECENT_SUCCESS, ResponseMessage.POST_RECENT_SUCCESS));
 	}
 
-	// @GetMapping(path = "/posts/recent")
-	// public ResponseEntity<?> recentPosts(
-	// @AuthenticationPrincipal OidcUser oidcUser) {
-	// OidcIdToken idToken = oidcUser.getIdToken();
-	// long userId = Integer.parseInt(idToken.getSubject());
-
-	// List<ServiceEvaluationPost> posts = userPostService.getNewFeeds(userId);
-
-	// if (posts.isEmpty() || posts == null) {
-	// BaseResponseDto<?> response = BaseResponseDto.ofFail(
-	// "user/posts/notfound", "posts not found");
-	// return ResponseEntity.badRequest().body(response);
-	// }
-
-	// return ResponseEntity.ok(BaseResponseDto.ofSucceed(posts));
-	// }
-
 	@GetMapping(path = "/posts/trending/user")
 	public ResponseEntity<?> trendingPosts() {
 		List<ServiceEvaluationPost> posts = trendingPostService.getTop10TrendingPosts();

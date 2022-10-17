@@ -1,0 +1,24 @@
+{
+  "name": "service_evaluation_social_media",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@material-ui/core": "^4.12.4",
+    "@material-ui/icons": "^4.11.3",
+    "@nextui-org/react": "^1.0.0-beta.7",
+    "next": "12.1.5",
+    "react": "18.1.0",
+    "react-dom": "18.1.0"
+  },
+  "devDependencies": {
+    "eslint": "8.14.0",
+    "eslint-config-next": "12.1.5",
+    "prettier": "^2.6.2"
+  }
+}
