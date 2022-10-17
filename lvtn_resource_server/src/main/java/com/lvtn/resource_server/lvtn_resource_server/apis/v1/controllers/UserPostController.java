@@ -19,7 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lvtn.resource_server.lvtn_resource_server.apis.v1.constants.ResponseCode;
 import com.lvtn.resource_server.lvtn_resource_server.apis.v1.constants.ResponseMessage;
+import com.lvtn.resource_server.lvtn_resource_server.apis.v1.dto.requests.post_request.PublicPostsGetRequestDto;
 import com.lvtn.resource_server.lvtn_resource_server.apis.v1.dto.responses.BaseResponseDto;
+import com.lvtn.resource_server.lvtn_resource_server.apis.v1.dto.responses.PagingResponseDto;
+import com.lvtn.resource_server.lvtn_resource_server.apis.v1.dto.responses.PostsResponseDto;
 import com.lvtn.resource_server.lvtn_resource_server.domains.posts.exceptions.PostNotFoundException;
 import com.lvtn.resource_server.lvtn_resource_server.domains.posts.pojos.Hotel;
 import com.lvtn.resource_server.lvtn_resource_server.domains.posts.pojos.PostImage;
@@ -49,8 +52,11 @@ public class UserPostController {
 	}
 
 	@GetMapping(path = "/posts/recent")
-	public ResponseEntity<?> recentPublicPosts() {
-		List<ServiceEvaluationPost> posts = userPostService.getNewFeeds(1);
+	public ResponseEntity<?> recentPublicPosts(@RequestBody PublicPostsGetRequestDto request) {
+		List<ServiceEvaluationPost> posts = userPostService.getNewFeeds(
+				request.getUsername(),
+				request.getPage(),
+				request.getSize());
 
 		if (posts == null) {
 			BaseResponseDto<?> response = BaseResponseDto.ofFail(
@@ -58,8 +64,13 @@ public class UserPostController {
 			return ResponseEntity.badRequest().body(response);
 		}
 
+		int totalSize = userPostService.getNewFeedsSize(request.getUsername());
+		PagingResponseDto paging = PagingResponseDto.getPagingResponse(posts.size(), request.getPage(), request.getSize(),
+				totalSize);
+		PostsResponseDto postResponse = new PostsResponseDto(posts, paging);
+
 		return ResponseEntity.ok(
-				BaseResponseDto.ofSucceed(posts, ResponseCode.POST_RECENT_SUCCESS, ResponseMessage.POST_RECENT_SUCCESS));
+				BaseResponseDto.ofSucceed(postResponse, ResponseCode.POST_RECENT_SUCCESS, ResponseMessage.POST_RECENT_SUCCESS));
 	}
 
 	// @GetMapping(path = "/posts/recent")
@@ -81,7 +92,7 @@ public class UserPostController {
 
 	@GetMapping(path = "/posts/trending/user")
 	public ResponseEntity<?> trendingPosts() {
-		List<ServiceEvaluationPost> posts = trendingPostService.getTop100TrendingPosts();
+		List<ServiceEvaluationPost> posts = trendingPostService.getTop10TrendingPosts();
 
 		if (posts.isEmpty() || posts == null) {
 			return ResponseEntity.badRequest()

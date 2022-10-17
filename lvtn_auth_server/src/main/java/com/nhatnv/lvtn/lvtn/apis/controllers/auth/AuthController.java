@@ -36,7 +36,7 @@ public class AuthController {
 					.username(cred.getUsername())
 					.firstName(cred.getFirstName())
 					.lastName(cred.getLastName())
-					.email(cred.getLastName())
+					.email(cred.getEmail())
 					.password(passwordEncoder.encode(cred.getPassword()))
 					.role("ROLE_USER")
 					.build();
@@ -46,6 +46,7 @@ public class AuthController {
 			SignUpResponseDto response = SignUpResponseDto.builder()
 					.user(
 							UserReponseDto.builder()
+									.userId(createdUser.getId())
 									.email(createdUser.getEmail())
 									.username(createdUser.getUsername())
 									.firstName(createdUser.getFirstName())

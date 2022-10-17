@@ -77,12 +77,28 @@ public class PostRepositoryImpl implements PostRepository {
 	}
 
 	@Override
-	public List<ServiceEvaluationPost> findRecentPosts(int size, int page) {
-		Pageable pageable = PageRequest.of(page, size);
+	public List<ServiceEvaluationPost> findHomePosts(String username, int page, int size) {
+		List<ServiceEvaluationPostEntity> entities = repository.findByUserFriendsUsernameOrderByCreatedAtDesc(username);
 
-		List<ServiceEvaluationPostEntity> entities = repository.findByOrderByCreatedAtDesc(pageable);
+		List<ServiceEvaluationPostEntity> subEntities = findSubEntities(entities, page, size);
 
-		return entities.stream().map(postMapper::serviceEvaluationPostEntityToPojo).collect(Collectors.toList());
+		return subEntities.stream().map(postMapper::serviceEvaluationPostEntityToPojo).collect(Collectors.toList());
+	}
+
+	private <T> List<T> findSubEntities(List<T> entities, int page, int size) {
+		int entitiesCount = entities.size();
+
+		int pageCount = entitiesCount % size == 0 ? entitiesCount / size : entitiesCount / size + 1;
+
+		List<T> subEntities = new ArrayList<>();
+
+		if (page < pageCount) {
+			int start = page * size;
+			int end = page == pageCount - 1 ? entitiesCount - 1 : ((page + 1) * size) - 1;
+			subEntities = entities.subList(start, end + 1);
+		}
+
+		return subEntities;
 	}
 
 	@Override
@@ -101,8 +117,15 @@ public class PostRepositoryImpl implements PostRepository {
 	}
 
 	@Override
-	public List<ServiceEvaluationPost> findRecentPosts() {
-		return findRecentPosts(10, 1);
+	public List<ServiceEvaluationPost> findPostsByUsername(String username, int page, int size) {
+		Pageable pageable = PageRequest.of(page, size);
+		List<ServiceEvaluationPostEntity> entities = repository.findByUserUsernameOrderByCreatedAtDesc(username, pageable);
+		return entities.stream().map(postMapper::serviceEvaluationPostEntityToPojo).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<ServiceEvaluationPost> findHomePosts(String username) {
+		return findHomePosts(username, 0, 10);
 	}
 
 	@Override
@@ -201,5 +224,19 @@ public class PostRepositoryImpl implements PostRepository {
 		entity.setVisibility(visibility);
 		repository.save(entity);
 		return postMapper.serviceEvaluationPostEntityToPojo(entity);
+	}
+
+	@Override
+	public int findHomePostsSize(String username) {
+		return repository.findByUserFriendsUsernameOrderByCreatedAtDesc(username).size();
+	}
+
+	@Override
+	public List<ServiceEvaluationPost> findRecentPosts(int page, int size) {
+		Pageable pageable = PageRequest.of(page, size);
+
+		List<ServiceEvaluationPostEntity> entities = repository.findByOrderByCreatedAtDesc(pageable);
+
+		return entities.stream().map(postMapper::serviceEvaluationPostEntityToPojo).collect(Collectors.toList());
 	}
 }

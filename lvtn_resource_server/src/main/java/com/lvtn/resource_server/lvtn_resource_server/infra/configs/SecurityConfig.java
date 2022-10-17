@@ -35,6 +35,8 @@ public class SecurityConfig {
 						.antMatchers(HttpMethod.DELETE,
 								"/api/v1/posts")
 						.hasAuthority("SCOPE_posts.write")
+						.antMatchers("/api/v1/user/*")
+						.hasAuthority("SCOPE_posts.read")
 						.anyRequest()
 						.authenticated())
 				.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder())))

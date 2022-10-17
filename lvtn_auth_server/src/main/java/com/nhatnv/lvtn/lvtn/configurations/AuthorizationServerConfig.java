@@ -87,7 +87,9 @@ public class AuthorizationServerConfig {
 
 	@Bean
 	TokenSettings tokenSettings() {
-		return TokenSettings.builder().accessTokenTimeToLive(Duration.ofMinutes(120)).build();
+		return TokenSettings.builder()
+				.accessTokenTimeToLive(Duration.ofMinutes(120))
+				.build();
 	}
 
 	@Bean

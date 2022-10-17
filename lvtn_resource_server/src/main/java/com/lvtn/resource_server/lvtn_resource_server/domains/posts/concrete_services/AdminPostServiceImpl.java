@@ -12,17 +12,15 @@ import com.lvtn.resource_server.lvtn_resource_server.domains.posts.services.Tren
 public class AdminPostServiceImpl implements AdminPostService, PostDelectionService, TrendingPostService {
 	private PostRepository postRepository;
 
-	private static final int TRENDING_POST_MAX = 100;
-
 	public AdminPostServiceImpl(PostRepository postRepository) {
 		this.postRepository = postRepository;
 	}
 
 	@Override
-	public List<ServiceEvaluationPost> getTop100TrendingPosts() {
-		List<ServiceEvaluationPost> recentPosts = postRepository.findRecentPosts(TRENDING_POST_MAX, 1);
+	public List<ServiceEvaluationPost> getTop10TrendingPosts() {
+		List<ServiceEvaluationPost> recentPosts = postRepository.findRecentPosts(0, 10);
 
-		return getTrendingPostsFromRecentPosts(recentPosts);
+		return getTrendingPostsFromRecentPosts(recentPosts).subList(0, 10);
 	}
 
 	private List<ServiceEvaluationPost> getTrendingPostsFromRecentPosts(List<ServiceEvaluationPost> recentPosts) {
@@ -42,10 +40,5 @@ public class AdminPostServiceImpl implements AdminPostService, PostDelectionServ
 	@Override
 	public List<ServiceEvaluationPost> getUserPosts(long userId, int page, int size) {
 		return postRepository.findPostsByUserId(userId, size, page);
-	}
-
-	@Override
-	public List<ServiceEvaluationPost> getRecentPosts(int page, int size) {
-		return postRepository.findRecentPosts(size, page);
 	}
 }

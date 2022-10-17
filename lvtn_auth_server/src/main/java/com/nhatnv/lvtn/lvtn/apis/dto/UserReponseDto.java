@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class UserReponseDto {
+	private long userId;
 	private String username;
 	private String firstName;
 	private String lastName;

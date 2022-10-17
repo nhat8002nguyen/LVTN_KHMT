@@ -46,7 +46,7 @@ public class ServiceEvaluationPostEntity {
 	@Size(max = 10000, message = "The description of the post must be at most 10000 character long")
 	private String body;
 
-	@OneToMany(mappedBy = "serviceEvaluationPost", cascade = CascadeType.PERSIST)
+	@OneToMany(mappedBy = "serviceEvaluationPost", cascade = { CascadeType.PERSIST, CascadeType.REMOVE })
 	private List<PostImageEntity> postImages;
 
 	@ManyToOne

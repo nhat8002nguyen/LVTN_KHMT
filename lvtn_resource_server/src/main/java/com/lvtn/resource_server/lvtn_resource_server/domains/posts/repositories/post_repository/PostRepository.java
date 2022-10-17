@@ -14,13 +14,19 @@ public interface PostRepository {
 
 	ServiceEvaluationPost updatePost(long postId, ServiceEvaluationPost post);
 
-	List<ServiceEvaluationPost> findRecentPosts();
+	List<ServiceEvaluationPost> findRecentPosts(int page, int size);
 
-	List<ServiceEvaluationPost> findRecentPosts(int size, int page);
+	List<ServiceEvaluationPost> findHomePosts(String username);
+
+	List<ServiceEvaluationPost> findHomePosts(String username, int page, int size);
+
+	int findHomePostsSize(String username);
 
 	ServiceEvaluationPost findPost(long postId);
 
 	List<ServiceEvaluationPost> findPostsByUserId(long userId, int size, int page);
+
+	List<ServiceEvaluationPost> findPostsByUsername(String username, int page, int size);
 
 	List<Hotel> findAllHotels();
 

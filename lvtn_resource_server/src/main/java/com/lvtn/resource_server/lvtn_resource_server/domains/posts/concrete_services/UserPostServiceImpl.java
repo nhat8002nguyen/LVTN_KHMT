@@ -16,21 +16,20 @@ public class UserPostServiceImpl implements UserPostService, PostDelectionServic
 
 	private PostRepository postRepository;
 
-	private static final int TRENDING_POST_MAX = 100;
-
 	public UserPostServiceImpl(
 			PostRepository postRepository) {
 		this.postRepository = postRepository;
 	}
 
 	@Override
-	public List<ServiceEvaluationPost> getTop100TrendingPosts() {
-		List<ServiceEvaluationPost> recentPosts = postRepository.findRecentPosts(TRENDING_POST_MAX, 1);
-		return getTrendingPostsFromRecentPosts(recentPosts);
+	public List<ServiceEvaluationPost> getTop10TrendingPosts() {
+		List<ServiceEvaluationPost> recentPosts = postRepository.findRecentPosts(0, 100);
+		List<ServiceEvaluationPost> trendablePosts = getTrendingPostsFromRecentPosts(recentPosts);
+		return trendablePosts.subList(0, 10);
 	}
 
 	private List<ServiceEvaluationPost> getTrendingPostsFromRecentPosts(List<ServiceEvaluationPost> recentPosts) {
-		// Trending posts should have at least 1000 likeds and 100 shareds
+		// Trending posts should have at least 500 likeds and 100 shareds
 		List<ServiceEvaluationPost> postsWith1000Likes = recentPosts.stream()
 				.filter(p -> p.getLikedCount() >= 500 && p.getSharedCount() >= 100)
 				.collect(Collectors.toList());
@@ -63,8 +62,13 @@ public class UserPostServiceImpl implements UserPostService, PostDelectionServic
 	}
 
 	@Override
-	public List<ServiceEvaluationPost> getNewFeeds(long userId) {
-		return postRepository.findPostsByUserId(userId, 10, 0);
+	public List<ServiceEvaluationPost> getNewFeeds(String username, int page, int size) {
+		return postRepository.findHomePosts(username, page, size);
+	}
+
+	@Override
+	public int getNewFeedsSize(String username) {
+		return postRepository.findHomePostsSize(username);
 	}
 
 	@Override

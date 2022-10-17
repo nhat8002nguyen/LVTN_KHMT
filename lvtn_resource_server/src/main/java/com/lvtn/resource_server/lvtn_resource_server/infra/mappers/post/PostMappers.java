@@ -43,6 +43,7 @@ public abstract class PostMappers {
 
 	public abstract Hotel hotelEntityToHotel(HotelEntity entity);
 
+	@Mapping(target = "friends", ignore = true)
 	@Mapping(target = "serviceEvaluationPosts", ignore = true)
 	public abstract UserEntity userToUserEntity(User user);
 

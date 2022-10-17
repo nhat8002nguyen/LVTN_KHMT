@@ -17,7 +17,7 @@ public class SecurityConfiguration {
 	SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
 		return http.authorizeRequests(
 				authorizeRequests -> authorizeRequests
-						.antMatchers("/api/v1/auth/sign-up").permitAll()
+						.antMatchers("/api/v1/auth/*").permitAll()
 						.anyRequest().authenticated())
 				.formLogin()
 				.and()

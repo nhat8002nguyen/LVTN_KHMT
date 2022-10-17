@@ -12,7 +12,9 @@ public interface UserPostService {
 
 	ServiceEvaluationPost updatePost(long postId, ServiceEvaluationPost post);
 
-	List<ServiceEvaluationPost> getNewFeeds(long userId);
+	List<ServiceEvaluationPost> getNewFeeds(String username, int page, int size);
+
+	int getNewFeedsSize(String username);
 
 	List<ServiceEvaluationPost> getPublicPostsOfUser(long userId, int size, int page);
 
