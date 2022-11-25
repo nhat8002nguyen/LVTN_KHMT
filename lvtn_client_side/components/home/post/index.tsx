@@ -1,19 +1,19 @@
+import { imageUrlAlt } from "@/constants/homeConstants";
+import { appColors } from "@/shared/theme";
 import {
   CheckCircle,
-  MoreVertRounded,
-  ThumbUpOutlined,
   ModeCommentOutlined,
+  MoreVertRounded,
   ScreenShareOutlined,
+  Send,
   ShareOutlined,
   ThumbUp,
-  Send,
-} from '@material-ui/icons';
-import { Avatar, Card, Input, Text } from '@nextui-org/react';
-import Image from 'next/image';
-import React from 'react';
-import { imageUrlAlt } from '@/constants/homeConstants';
-import styles from './styles.module.css';
-import { appColors } from '@/shared/theme';
+  ThumbUpOutlined,
+} from "@material-ui/icons";
+import { Avatar, Card, Input, Text } from "@nextui-org/react";
+import Image from "next/image";
+import React from "react";
+import styles from "./styles.module.css";
 
 export default function Post(props) {
   const {
@@ -31,41 +31,41 @@ export default function Post(props) {
 
   const getDayMonth = () => {
     const monthNames = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Set',
-      'Oct',
-      'Nov',
-      'Dec',
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Set",
+      "Oct",
+      "Nov",
+      "Dec",
     ];
 
     let date = new Date(createdAt);
-    return date.getDate() + ' ' + monthNames[date.getMonth()];
+    return date.getDate() + " " + monthNames[date.getMonth()];
   };
 
   return (
     <Card
-      css={{ minHeight: '30rem', maxWidth: '40rem', backgroundColor: 'white' }}
+      css={{ minHeight: "30rem", maxWidth: "40rem", backgroundColor: "white" }}
     >
       <div className={styles.postContainer}>
         <Avatar src={avatar} rounded />
         <div className={styles.postMain}>
           <div className={styles.header}>
             <div className={styles.headerLeft}>
-              <Text css={{ fontWeight: 'bold' }}>{name}</Text>
+              <Text css={{ fontWeight: "bold" }}>{name}</Text>
               {identified == 1 ? (
                 <CheckCircle color="primary" fontSize="small" />
               ) : null}
-              <Text css={{ fontSize: 'small' }}>{tagName}</Text>
+              <Text css={{ fontSize: "small" }}>{tagName}</Text>
             </div>
             <div className={styles.headerRight}>
-              <Text css={{ fontSize: 'small' }}>{getDayMonth()}</Text>
+              <Text css={{ fontSize: "small" }}>{getDayMonth()}</Text>
               <MoreVertRounded />
             </div>
           </div>
@@ -99,7 +99,7 @@ const PostImages = ({ images }) => {
   ) {
     return (
       <Image
-        style={{ cursor: 'pointer' }}
+        style={{ cursor: "pointer" }}
         src={images.first}
         alt={imageUrlAlt.postAlt}
         width={450}
@@ -116,14 +116,14 @@ const PostImages = ({ images }) => {
     return (
       <div>
         <Image
-          style={{ cursor: 'pointer' }}
+          style={{ cursor: "pointer" }}
           src={images.first}
           alt={imageUrlAlt.postAlt}
           width={225}
           height={225}
         />
         <Image
-          style={{ cursor: 'pointer' }}
+          style={{ cursor: "pointer" }}
           src={images.second}
           alt={imageUrlAlt.postAlt}
           width={225}
@@ -137,7 +137,7 @@ const PostImages = ({ images }) => {
     <div className={styles.images}>
       <div className={styles.smallImages}>
         <Image
-          style={{ cursor: 'pointer' }}
+          style={{ cursor: "pointer" }}
           src={images.first}
           alt={imageUrlAlt.postAlt}
           width={150}
@@ -145,7 +145,7 @@ const PostImages = ({ images }) => {
           objectFit="cover"
         />
         <Image
-          style={{ cursor: 'pointer' }}
+          style={{ cursor: "pointer" }}
           src={images.second}
           alt={imageUrlAlt.postAlt}
           width={150}
@@ -155,7 +155,7 @@ const PostImages = ({ images }) => {
       </div>
       <div className={styles.bigImage}>
         <Image
-          style={{ cursor: 'pointer' }}
+          style={{ cursor: "pointer" }}
           src={images.third}
           alt={imageUrlAlt.postAlt}
           width={300}
@@ -178,25 +178,25 @@ const InteractionMetrics = ({ numLikeds, numTexts, numShareds }) => {
 
     if (num < 1000000) {
       if (num % 1000 == 0) {
-        return numStr.substring(0, numStr.length - 3) + 'k';
+        return numStr.substring(0, numStr.length - 3) + "k";
       } else {
         return (
           numStr.substring(0, numStr.length - 3) +
-          '.' +
+          "." +
           numStr.charAt(numStr.length - 3) +
-          'k'
+          "k"
         );
       }
     }
 
     if (num % 1000000 == 0) {
-      return numStr.substring(0, numStr.length - 6) + 'k';
+      return numStr.substring(0, numStr.length - 6) + "k";
     } else {
       return (
         numStr.substring(0, numStr.length - 6) +
-        '.' +
+        "." +
         numStr.charAt(numStr.length - 6) +
-        'm'
+        "m"
       );
     }
   };
@@ -205,17 +205,17 @@ const InteractionMetrics = ({ numLikeds, numTexts, numShareds }) => {
     <div className={styles.interactionMetrics}>
       <div className={styles.metric}>
         <LikeIcon onClick={toggleLike} liked={liked} />
-        <Text css={{ fontSize: 'small' }}>{showNum(numLikeds)}</Text>
+        <Text css={{ fontSize: "small" }}>{showNum(numLikeds)}</Text>
       </div>
       <div className={styles.metric}>
         <ModeCommentOutlined />
-        <Text css={{ fontSize: 'small' }}>{showNum(numTexts)}</Text>
+        <Text css={{ fontSize: "small" }}>{showNum(numTexts)}</Text>
       </div>
       <div className={styles.metric}>
         <ScreenShareOutlined />
-        <Text css={{ fontSize: 'small' }}>{showNum(numShareds)}</Text>
+        <Text css={{ fontSize: "small" }}>{showNum(numShareds)}</Text>
       </div>
-      <div>
+      <div className={styles.metric}>
         <ShareOutlined />
       </div>
     </div>
@@ -259,16 +259,16 @@ const CommentThread = (props) => {
       <Avatar src={avatar} />
       <div className={styles.commentThreadColumn}>
         <div className={styles.comment}>
-          <Text small css={{ fontWeight: 'bold' }}>
+          <Text small css={{ fontWeight: "bold" }}>
             {name}
           </Text>
           <Text small>{message}</Text>
         </div>
         <div className={styles.commentInteraction}>
-          <Text size={12} css={{ cursor: 'pointer' }}>
+          <Text size={12} css={{ cursor: "pointer" }}>
             Like
           </Text>
-          <Text size={12} css={{ cursor: 'pointer' }}>
+          <Text size={12} css={{ cursor: "pointer" }}>
             Reply
           </Text>
           <Text size={12}>10min</Text>
@@ -291,16 +291,16 @@ const Comment = (props) => {
       <Avatar src={avatar} />
       <div className={styles.commentThreadColumn}>
         <div className={styles.comment}>
-          <Text small css={{ fontWeight: 'bold' }}>
+          <Text small css={{ fontWeight: "bold" }}>
             {name}
           </Text>
           <Text small>{message}</Text>
         </div>
         <div className={styles.commentInteraction}>
-          <Text size={12} css={{ cursor: 'pointer' }}>
+          <Text size={12} css={{ cursor: "pointer" }}>
             Like
           </Text>
-          <Text size={12} css={{ cursor: 'pointer' }}>
+          <Text size={12} css={{ cursor: "pointer" }}>
             Reply
           </Text>
           <Text size={12}>10min</Text>

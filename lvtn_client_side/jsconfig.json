@@ -6,7 +6,8 @@
 			"@/dummyData/*": ["dummyData/*"],
 			"@/shared/*": ["shared/*"],
 			"@/constants/*": ["constants/*"],
-			"@/hooks/*": ["hooks/*"]
+			"@/hooks/*": ["hooks/*"],
+			"@/services/*": ["services/*"]
 		}
   }
 }

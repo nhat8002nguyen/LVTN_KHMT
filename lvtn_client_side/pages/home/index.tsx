@@ -1,18 +1,28 @@
-import Head from 'next/head';
-import Image from 'next/image';
-import styles from './styles.module.css';
-import { LeftSide, RightSide } from '@/components/index';
-import HomeNavigation from '@/components/home/homeNavigation';
-import { useState } from 'react';
-import { ArrowForwardRounded } from '@material-ui/icons';
-import UserStatusInput from '@/components/home/userStatusInput';
-import PersonCard from '@/components/home/personCard';
-import { posts } from '@/dummyData/posts.json';
-import Post from '@/components/home/post';
-import { recommendedFriends } from '@/dummyData/recommendedFriends.json';
-import appPages from '@/shared/appPages';
+import HomeNavigation from "@/components/home/homeNavigation";
+import PersonCard from "@/components/home/personCard";
+import Post from "@/components/home/post";
+import UserStatusInput from "@/components/home/userStatusInput";
+import LeftSide from "@/components/leftSide";
+import RightSide from "@/components/rightSide";
+import { posts } from "@/dummyData/posts.json";
+import { recommendedFriends } from "@/dummyData/recommendedFriends.json";
+import appPages from "@/shared/appPages";
+import { ArrowForwardRounded } from "@material-ui/icons";
+import { signIn, useSession } from "next-auth/react";
+import Head from "next/head";
+import Image from "next/image";
+import { useEffect } from "react";
+import styles from "./styles.module.css";
 
 export default function Home() {
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    if ((session as any)?.error === "RefreshAccessTokenError") {
+      signIn(); // Force sign in to hopefully resolve error
+    }
+  }, [session]);
+
   return (
     <div className={styles.container}>
       <Head>
@@ -28,7 +38,7 @@ export default function Home() {
           <div className={styles.recommendedPeople}>
             <div className={styles.cardListHeader}>
               <p>Follow People</p>
-              <ArrowForwardRounded style={{ cursor: 'pointer' }} />
+              <ArrowForwardRounded style={{ cursor: "pointer" }} />
             </div>
             <div className={styles.recommendList}>
               {recommendedFriends.map((person) => {
@@ -50,7 +60,7 @@ export default function Home() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Powered by{' '}
+          Powered by{" "}
           <span className={styles.logo}>
             <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
           </span>
