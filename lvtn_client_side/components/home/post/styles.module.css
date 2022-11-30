@@ -30,8 +30,48 @@
   gap: 0.5rem;
 }
 
+.title {
+	padding: 1rem 0;
+	font-weight: 700;
+	font-size: 16px;
+}
+
 .descriptions {
-  padding: 1rem 0;
+	padding-bottom: 0.5rem;
+}
+
+.ratingAndHotelDetail {
+	display: flex;
+	padding-bottom: 1rem;
+}
+
+.hotelDetail {
+	flex: 1;
+}
+
+.hotelText {
+	font-style: italic;
+	font-size: small;
+}
+
+.ratingArea {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+
+.ratingAreaRow {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+}
+
+.rating {
+display: flex;
+}
+
+.ratingText {
+	font-size: 10px;
 }
 
 .images {

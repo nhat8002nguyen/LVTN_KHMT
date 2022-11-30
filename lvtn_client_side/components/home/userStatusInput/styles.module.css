@@ -2,7 +2,7 @@
 	min-height: 3rem;
 	display: flex;
 	align-items: center;
-	justify-content: start;
+	justify-content: flex-start;
 	gap: 0.5rem;
 	background-color: white;
 	padding: 0 1rem;
@@ -11,17 +11,52 @@
 	border-radius: 1rem;
 }
 
-.userStatusInput > input {
+.formHeader {
+	flex: 10;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.formLabel {
 	border: none;
 	outline: none;
 	flex: 1;
+	font-weight: 300;
+	cursor: pointer;
 }
 
 .avatarIcon {
+	flex: 1;
 	color: var(--primary-button-color);
 }
 
 .addIcon {
 	color: var(--primary-button-color);
 	cursor: pointer;
+	flex: 1
+}
+
+.ratingArea {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.ratingAreaRow {
+	display: flex;
+	justify-content: flex-start;
+}
+
+.rating {
+	flex: 1;
+}
+
+.photoAddingArea {
+	cursor: pointer;
+}
+
+.footerButtons {
+	display: flex;
+	gap: 1rem;
 }

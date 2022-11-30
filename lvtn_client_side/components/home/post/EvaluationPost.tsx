@@ -1,5 +1,6 @@
 import { imageUrlAlt } from "@/constants/homeConstants";
 import { appColors } from "@/shared/theme";
+import { Typography } from "@material-ui/core";
 import {
   CheckCircle,
   ModeCommentOutlined,
@@ -10,24 +11,26 @@ import {
   ThumbUp,
   ThumbUpOutlined,
 } from "@material-ui/icons";
-import { Avatar, Card, Input, Text } from "@nextui-org/react";
+import { Rating } from "@mui/material";
+import { Avatar, Card, Input, Loading, Text } from "@nextui-org/react";
 import Image from "next/image";
-import React from "react";
+import React, { ReactElement, useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { PostState } from "redux/slices/home/posts/postListSlice";
+import { RootState } from "redux/store/store";
 import styles from "./styles.module.css";
 
-export default function Post(props) {
-  const {
-    stableData: {
-      avatar,
-      name,
-      identified,
-      tagName,
-      createdAt,
-      descriptions,
-      images,
-    },
-    unstableData: { numLikeds, numTexts, numShareds, threadChats },
-  } = props;
+export default function EvaluationPost(props) {
+  const { id } = props;
+  const postListState = useSelector((state: RootState) => state.postList);
+  const [postProps, setPostProps] = useState<PostState>();
+
+  useEffect(() => {
+    const post = (postListState.posts as Array<PostState>).find(
+      (value) => value.id == id
+    );
+    setPostProps(post);
+  }, []);
 
   const getDayMonth = () => {
     const monthNames = [
@@ -45,7 +48,7 @@ export default function Post(props) {
       "Dec",
     ];
 
-    let date = new Date(createdAt);
+    let date = new Date(postProps.createdAt);
     return date.getDate() + " " + monthNames[date.getMonth()];
   };
 
@@ -53,40 +56,70 @@ export default function Post(props) {
     <Card
       css={{ minHeight: "30rem", maxWidth: "40rem", backgroundColor: "white" }}
     >
-      <div className={styles.postContainer}>
-        <Avatar src={avatar} rounded />
-        <div className={styles.postMain}>
-          <div className={styles.header}>
-            <div className={styles.headerLeft}>
-              <Text css={{ fontWeight: "bold" }}>{name}</Text>
-              {identified == 1 ? (
-                <CheckCircle color="primary" fontSize="small" />
-              ) : null}
-              <Text css={{ fontSize: "small" }}>{tagName}</Text>
-            </div>
-            <div className={styles.headerRight}>
-              <Text css={{ fontSize: "small" }}>{getDayMonth()}</Text>
-              <MoreVertRounded />
-            </div>
-          </div>
-          <div className={styles.content}>
-            <div className={styles.descriptions}>
-              {descriptions.map((des, i) => (
-                <Text css={des.styles} key={i}>
-                  {des.text}
+      {!postProps ? (
+        <Loading type="points" color="currentColor" size="sm" />
+      ) : (
+        <div className={styles.postContainer}>
+          <Avatar src={postProps.postOwner.image} rounded />
+          <div className={styles.postMain}>
+            <div className={styles.header}>
+              <div className={styles.headerLeft}>
+                <Text css={{ fontWeight: "bold" }}>
+                  {postProps.postOwner.username}
                 </Text>
-              ))}
+                {true ? <CheckCircle color="primary" fontSize="small" /> : null}
+                <Text css={{ fontSize: "small" }}>
+                  {postProps.postOwner.email}
+                </Text>
+              </div>
+              <div className={styles.headerRight}>
+                <Text css={{ fontSize: "small" }}>{getDayMonth()}</Text>
+                <MoreVertRounded />
+              </div>
             </div>
-            <PostImages images={images} />
-            <InteractionMetrics
-              numLikeds={numLikeds}
-              numTexts={numTexts}
-              numShareds={numShareds}
-            />
-            <CommentArea avatar={avatar} threadChats={threadChats} />
+            <div className={styles.content}>
+              <Text className={styles.title}>{postProps.title}</Text>
+              <div className={styles.descriptions}>
+                {postProps.body.split(".").map((text, i) => (
+                  <Text key={i}>{text}</Text>
+                ))}
+              </div>
+              <div className={styles.ratingAndHotelDetail}>
+                <PostRatingArea
+                  locationRating={postProps.locationRating}
+                  serviceRating={postProps.serviceRating}
+                  cleanlinessRating={postProps.cleanlinessRating}
+                  valueRating={postProps.valueRating}
+                />
+                <div className={styles.hotelDetail}>
+                  <Text className={styles.hotelText} color={appColors.primary}>
+                    {"Hotel: " + postProps.hotel.name}
+                  </Text>
+                  <Text className={styles.hotelText} color={appColors.primary}>
+                    {"Location: " + postProps.hotel.location}
+                  </Text>
+                </div>
+              </div>
+              <PostImages
+                images={{
+                  first: postProps.images[0]?.url,
+                  second: postProps.images[1]?.url,
+                  third: postProps.images[2]?.url,
+                }}
+              />
+              <InteractionMetrics
+                numLikeds={postProps.likedCount}
+                numTexts={postProps.sharedCount}
+                numShareds={postProps.commentCount}
+              />
+              <CommentArea
+                avatar={postProps.postOwner.image}
+                threadChats={[]}
+              />
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </Card>
   );
 }
@@ -127,7 +160,6 @@ const PostImages = ({ images }) => {
       </div>
     );
   }
-
   if (images.first != null && images.second != null && images.third != null) {
     return (
       <div className={styles.images}>
@@ -162,6 +194,78 @@ const PostImages = ({ images }) => {
       </div>
     );
   }
+};
+
+const PostRatingArea = ({
+  locationRating,
+  serviceRating,
+  cleanlinessRating,
+  valueRating,
+}: PostRatingArea): ReactElement => {
+  return (
+    <div className={styles.ratingArea}>
+      <div className={styles.ratingAreaRow}>
+        <div className={styles.rating}>
+          <Typography
+            style={{ fontSize: "12px" }}
+            className={styles.ratingText}
+            component="legend"
+          >
+            Value --------
+          </Typography>
+          <Rating
+            size="small"
+            name="read-only"
+            precision={0.5}
+            value={valueRating}
+            readOnly
+          />
+        </div>
+        <div className={styles.rating}>
+          <Typography style={{ fontSize: "12px" }} component="legend">
+            Location -----
+          </Typography>
+          <Rating
+            size="small"
+            name="read-only"
+            precision={0.5}
+            value={locationRating}
+            readOnly
+          />
+        </div>
+        <div className={styles.rating}>
+          <Typography style={{ fontSize: "12px" }} component="legend">
+            Service ------
+          </Typography>
+          <Rating
+            size="small"
+            name="read-only"
+            precision={0.5}
+            value={serviceRating}
+            readOnly
+          />
+        </div>
+      </div>
+      <div className={styles.ratingAreaRow}>
+        <div className={styles.rating}>
+          <Typography
+            style={{ fontSize: "12px" }}
+            className={styles.ratingText}
+            component="legend"
+          >
+            Clealiness --
+          </Typography>
+          <Rating
+            size="small"
+            name="read-only"
+            precision={0.5}
+            value={cleanlinessRating}
+            readOnly
+          />
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const InteractionMetrics = ({ numLikeds, numTexts, numShareds }) => {
@@ -306,3 +410,10 @@ const Comment = (props) => {
     </div>
   );
 };
+
+interface PostRatingArea {
+  locationRating: number;
+  serviceRating: number;
+  cleanlinessRating: number;
+  valueRating: number;
+}

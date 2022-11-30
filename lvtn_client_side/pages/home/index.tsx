@@ -1,21 +1,36 @@
 import HomeNavigation from "@/components/home/homeNavigation";
 import PersonCard from "@/components/home/personCard";
-import Post from "@/components/home/post";
+import EvaluationPost from "@/components/home/post/EvaluationPost";
 import UserStatusInput from "@/components/home/userStatusInput";
 import LeftSide from "@/components/leftSide";
+import CustomizedSnackbars from "@/components/mocules/snackbars";
 import RightSide from "@/components/rightSide";
-import { posts } from "@/dummyData/posts.json";
 import { recommendedFriends } from "@/dummyData/recommendedFriends.json";
+import useNewsFeed from "@/hooks/useNewsFeed";
 import appPages from "@/shared/appPages";
 import { ArrowForwardRounded } from "@material-ui/icons";
+import { Loading } from "@nextui-org/react";
 import { signIn, useSession } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
 import { useEffect } from "react";
+import { useSelector } from "react-redux";
+import { AuthState } from "redux/slices/auth/authSlice";
+import { PostState } from "redux/slices/home/posts/postListSlice";
+import { RootState } from "redux/store/store";
 import styles from "./styles.module.css";
 
 export default function Home() {
-  const { data: session } = useSession();
+  const { data: session, status: sessionState } = useSession();
+  const {
+    session: authSession,
+    sessionStatus: authSessionStatus,
+    syncDBStatus,
+  }: AuthState = useSelector((state: RootState) => state.auth);
+  const { posts, loading: postsLoading } = useSelector(
+    (state: RootState) => state.postList
+  );
+  const { refreshNewsFeed } = useNewsFeed();
 
   useEffect(() => {
     if ((session as any)?.error === "RefreshAccessTokenError") {
@@ -34,7 +49,7 @@ export default function Home() {
         <LeftSide currentPage={appPages.home} />
         <div className={styles.contentContainer}>
           <HomeNavigation />
-          <UserStatusInput />
+          <UserStatusInput refreshNewsFeed={refreshNewsFeed} />
           <div className={styles.recommendedPeople}>
             <div className={styles.cardListHeader}>
               <p>Follow People</p>
@@ -46,14 +61,20 @@ export default function Home() {
               })}
             </div>
           </div>
+
           <div className={styles.listPost}>
-            {posts.map((post) => (
-              <Post key={post.id} {...post} />
-            ))}
+            {postsLoading == "loading" || syncDBStatus == "pending" ? (
+              <Loading type="spinner" color="currentColor" size="xl" />
+            ) : (
+              posts.map((post: PostState) => (
+                <EvaluationPost key={post.id} {...post} />
+              ))
+            )}
           </div>
         </div>
         <RightSide />
       </main>
+      <CustomizedSnackbars />
       <footer className={styles.footer}>
         <a
           href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"

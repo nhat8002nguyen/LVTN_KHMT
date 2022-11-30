@@ -1,6 +1,7 @@
 .main {
   display: flex;
-  gap: 3rem;
+	justify-content: center;
+  gap: 10rem;
   min-width: 100vw;
   min-height: 100vh;
   background-color: var(--app-background-color);
@@ -8,7 +9,7 @@
 
 /* body */
 .contentContainer {
-  flex: 5;
+  flex: 3;
   display: flex;
   flex-direction: column;
   justify-content: start;

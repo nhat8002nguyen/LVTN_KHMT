@@ -9,8 +9,16 @@ import {
   WhatshotRounded,
 } from "@material-ui/icons";
 import GoogleIcon from "@mui/icons-material/Google";
+import { Session } from "next-auth";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { UserRequestDto } from "redux/slices/auth/authAPI";
+import {
+  AuthState,
+  setAuthState,
+  syncGoogleAccountDB,
+} from "redux/slices/auth/authSlice";
+import { useAppDispatch } from "redux/store/store";
 import appPages from "../../shared/appPages";
 import GlobalButton from "../atoms/GlobalButton";
 import styles from "./styles.module.css";
@@ -62,9 +70,8 @@ const createMenuItems = (currentPage) => [
 
 export default function LeftSide(props) {
   const { currentPage } = props;
-
+  const appDispatch = useAppDispatch();
   const { data: session, status: sessionStatus } = useSession();
-
   const [menuItems, setMenuItems] = useState(() =>
     createMenuItems(currentPage)
   );
@@ -73,11 +80,41 @@ export default function LeftSide(props) {
   );
 
   useEffect(() => {
-    if (sessionStatus == "authenticated") {
+    if (sessionStatus == "authenticated" && session.user != null) {
+      saveSessionToState(session);
+      syncGoogleAccountToDB();
       setSignInButtonText(session.user.name);
     }
-    console.log(session);
-  }, [sessionStatus]);
+  }, [sessionStatus, session]);
+
+  const saveSessionToState = (session: Session) => {
+    let authState: AuthState = {
+      session: {
+        user: {
+          db_id: null,
+          google_account_id: (session as any).user.id,
+          name: session.user.name,
+          email: session.user.email,
+          image: session.user.image,
+        },
+        accessToken: (session as any).accessToken,
+        error: (session as any).error,
+      },
+      sessionStatus: sessionStatus,
+    };
+    appDispatch(setAuthState(authState));
+  };
+
+  const syncGoogleAccountToDB = () => {
+    const user: UserRequestDto = {
+      username: session.user.name,
+      email: session.user.email,
+      password: (session as any).user.id,
+      image: session.user.image,
+      googleAccountID: (session as any).user.id,
+    };
+    appDispatch(syncGoogleAccountDB(user));
+  };
 
   const onGoogleSignInButtonPress = () => {
     if (sessionStatus == "loading") {
