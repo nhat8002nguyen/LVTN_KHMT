@@ -12,7 +12,16 @@ const nextConfig = {
       "pix10.agoda.net",
       "chupanhnoithat.vn",
       "d2e5ushqwiltxm.cloudfront.net",
+      "res.cloudinary.com",
     ],
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/api/cloudinary/:path*",
+        destination: "https://api.cloudinary.com/:path*",
+      },
+    ];
   },
 };
 

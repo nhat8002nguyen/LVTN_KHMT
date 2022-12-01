@@ -10,3 +10,13 @@ export const harusaAxios = axios.create({
   },
   timeout: 10000,
 });
+
+export const cloudinaryAxios = axios.create({
+  baseURL: "https://api.cloudinary.com/v1_1",
+  headers: {
+    common: {
+      "Content-Type": "multipart/form-data",
+    },
+  },
+  timeout: 10000,
+});

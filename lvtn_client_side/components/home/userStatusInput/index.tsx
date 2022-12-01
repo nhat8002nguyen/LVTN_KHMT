@@ -5,6 +5,7 @@ import {
 } from "@material-ui/icons";
 import { Rating, Typography } from "@mui/material";
 import {
+  Avatar,
   Button,
   FormElement,
   Input,
@@ -14,9 +15,7 @@ import {
   Textarea,
   useModal,
 } from "@nextui-org/react";
-import Head from "next/head";
-import Script from "next/script";
-import { ChangeEvent, ReactElement, useEffect, useState } from "react";
+import { ChangeEvent, ReactElement, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { AuthState } from "redux/slices/auth/authSlice";
 import {
@@ -26,23 +25,18 @@ import {
 } from "redux/slices/home/posts/postFormSlice";
 import { toggleSnackbar } from "redux/slices/statusNotifications/snackbarsSlice";
 import { RootState, useAppDispatch } from "redux/store/store";
-import { PostModalProps, RatingAreaProps } from "./interface";
+import {
+  FileWithURL,
+  PhotosAddingProps,
+  PostModalProps,
+  RatingAreaProps,
+} from "./interface";
 import styles from "./styles.module.css";
 
 export default function UserStatusInput({ refreshNewsFeed }) {
   const dispatch = useAppDispatch();
   const { setVisible, bindings } = useModal();
-  const [postValues, setPostValues] = useState<PostFormDetailState>({
-    userId: -1,
-    title: null,
-    body: "",
-    hotel: null,
-    locationRating: 2.5,
-    serviceRating: 2.5,
-    cleanlinessRating: 2.5,
-    valueRating: 2.5,
-    images: [],
-  });
+  const [postValues, setPostValues] = useState<PostFormDetailState>();
   const { requestStatus }: PostFormState = useSelector(
     (state: RootState) => state.postForm
   );
@@ -55,6 +49,22 @@ export default function UserStatusInput({ refreshNewsFeed }) {
       setPostValues((prev) => ({ ...prev, userId: session.user.db_id }));
     }
   }, [sessionStatus, session]);
+
+  useEffect(() => {
+    if (bindings.open) {
+      setPostValues((prev) => ({
+        ...prev,
+        title: null,
+        body: "",
+        hotel: null,
+        locationRating: 2.5,
+        serviceRating: 2.5,
+        cleanlinessRating: 2.5,
+        valueRating: 2.5,
+        images: [],
+      }));
+    }
+  }, [bindings.open]);
 
   useEffect(() => {
     if (requestStatus == "failed") {
@@ -90,15 +100,32 @@ export default function UserStatusInput({ refreshNewsFeed }) {
   const validatePostValues = (postValues: PostFormDetailState): Boolean => {
     const { userId, body, hotel } = postValues;
     if (userId < 0) {
-      alert("Current session is outdated or unauthenticated");
+      dispatch(
+        toggleSnackbar({
+          message:
+            "Current session is unauthenticated or outdated, please reload page !",
+          severity: "error",
+        })
+      );
       return false;
     }
     if (body.length == 0) {
-      alert("Body should not empty, please add it !");
+      dispatch(
+        toggleSnackbar({
+          message: "Body should not empty, please fill it !",
+          severity: "error",
+        })
+      );
       return false;
     }
     if (Number.isNaN(hotel)) {
-      alert("Cannot find hotel.");
+      dispatch(
+        toggleSnackbar({
+          message: "Hotel not found, please enter exiting hotel",
+          severity: "error",
+        })
+      );
+
       setPostValues((prev) => ({ ...prev, hotel: null }));
     }
     return true;
@@ -110,12 +137,6 @@ export default function UserStatusInput({ refreshNewsFeed }) {
 
   return (
     <form className={styles.userStatusInput}>
-      <Head>
-        <Script
-          src="https://widget.cloudinary.com/v2.0/global/all.js"
-          type="text/javascript"
-        ></Script>
-      </Head>
       <AccountCircleRounded className={styles.avatarIcon} />
       <div className={styles.formHeader}>
         <label className={styles.formLabel} onClick={() => setVisible(true)}>
@@ -200,9 +221,7 @@ const PostModal = ({
         <RatingArea postInfo={postInfo} setPostInfo={setPostInfo}></RatingArea>
       </Modal.Body>
       <Modal.Footer justify="space-between">
-        <div className={styles.photoAddingArea}>
-          <AddPhotoAlternate fontSize="large" color="primary" />
-        </div>
+        <PhotosAdding postInfo={postInfo} setPostInfo={setPostInfo} />
         <div className={styles.footerButtons}>
           <Button auto flat color="error" onClick={onCloseClick}>
             Close
@@ -232,6 +251,18 @@ const RatingArea = ({
     <div className={styles.ratingArea}>
       <div className={styles.ratingAreaRow}>
         <div className={styles.rating}>
+          <Typography component="legend">Value</Typography>
+          <Rating
+            name="half-rating"
+            defaultValue={2.5}
+            precision={1}
+            value={postInfo.valueRating}
+            onChange={(event, newValue) => {
+              setPostInfo((prev) => ({ ...prev, valueRating: newValue }));
+            }}
+          />
+        </div>
+        <div className={styles.rating}>
           <Typography component="legend">Location</Typography>
           <Rating
             name="half-rating"
@@ -240,18 +271,6 @@ const RatingArea = ({
             value={postInfo.locationRating}
             onChange={(event, newValue) => {
               setPostInfo((prev) => ({ ...prev, locationRating: newValue }));
-            }}
-          />
-        </div>
-        <div className={styles.rating}>
-          <Typography component="legend">Service</Typography>
-          <Rating
-            name="half-rating"
-            defaultValue={2.5}
-            precision={0.5}
-            value={postInfo.serviceRating}
-            onChange={(event, newValue) => {
-              setPostInfo((prev) => ({ ...prev, serviceRating: newValue }));
             }}
           />
         </div>
@@ -270,17 +289,75 @@ const RatingArea = ({
           />
         </div>
         <div className={styles.rating}>
-          <Typography component="legend">Value</Typography>
+          <Typography component="legend">Service</Typography>
           <Rating
             name="half-rating"
             defaultValue={2.5}
             precision={0.5}
-            value={postInfo.valueRating}
+            value={postInfo.serviceRating}
             onChange={(event, newValue) => {
-              setPostInfo((prev) => ({ ...prev, valueRating: newValue }));
+              setPostInfo((prev) => ({ ...prev, serviceRating: newValue }));
             }}
           />
         </div>
+      </div>
+    </div>
+  );
+};
+
+const PhotosAdding = ({
+  postInfo,
+  setPostInfo,
+}: PhotosAddingProps): ReactElement => {
+  const fileInputRef = useRef(null);
+  const [files, setFiles] = useState<Array<FileWithURL>>([]);
+
+  const openFileUploader = () => {
+    if (files.length < 3) {
+      fileInputRef.current?.click();
+    }
+  };
+
+  const handleFileUpload = (e: ChangeEvent) => {
+    const fileList = (e.target as any).files as FileList;
+    for (let i = 0; i < fileList.length; i++) {
+      setFiles((prev) => [
+        ...prev,
+        { file: fileList[i], url: URL.createObjectURL(fileList[i]) },
+      ]);
+      setPostInfo((prev: PostFormDetailState) => ({
+        ...prev,
+        images: [...prev.images, fileList[i]],
+      }));
+    }
+  };
+
+  const removeAllImages = () => {
+    setFiles([]);
+    setPostInfo((prev) => ({ ...prev, images: [] }));
+  };
+
+  return (
+    <div className={styles.photoAddingArea}>
+      <div onClick={openFileUploader}>
+        <AddPhotoAlternate fontSize="large" color="primary" />
+      </div>
+      <Input
+        multiple
+        hidden
+        ref={fileInputRef}
+        type={"file"}
+        onChange={handleFileUpload}
+      ></Input>
+      {files.length > 0 ? (
+        <Button auto size="sm" flat color="error" onClick={removeAllImages}>
+          Clear
+        </Button>
+      ) : null}
+      <div className={styles.addedFileList}>
+        {files.map((file: FileWithURL, index) => (
+          <Avatar key={index} pointer squared src={file.url} />
+        ))}
       </div>
     </div>
   );

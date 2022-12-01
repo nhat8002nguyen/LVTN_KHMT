@@ -91,14 +91,22 @@ export default function EvaluationPost(props) {
                   cleanlinessRating={postProps.cleanlinessRating}
                   valueRating={postProps.valueRating}
                 />
-                <div className={styles.hotelDetail}>
-                  <Text className={styles.hotelText} color={appColors.primary}>
-                    {"Hotel: " + postProps.hotel.name}
-                  </Text>
-                  <Text className={styles.hotelText} color={appColors.primary}>
-                    {"Location: " + postProps.hotel.location}
-                  </Text>
-                </div>
+                {!postProps.hotel ? null : (
+                  <div className={styles.hotelDetail}>
+                    <Text
+                      className={styles.hotelText}
+                      color={appColors.primary}
+                    >
+                      {"Hotel: " + postProps.hotel.name}
+                    </Text>
+                    <Text
+                      className={styles.hotelText}
+                      color={appColors.primary}
+                    >
+                      {"Location: " + postProps.hotel.location}
+                    </Text>
+                  </div>
+                )}
               </div>
               <PostImages
                 images={{
@@ -136,6 +144,7 @@ const PostImages = ({ images }) => {
         alt={imageUrlAlt.postAlt}
         width={450}
         height={300}
+        objectFit="cover"
       />
     );
   }
@@ -149,6 +158,7 @@ const PostImages = ({ images }) => {
           alt={imageUrlAlt.postAlt}
           width={225}
           height={225}
+          objectFit="cover"
         />
         <Image
           style={{ cursor: "pointer" }}
@@ -156,6 +166,7 @@ const PostImages = ({ images }) => {
           alt={imageUrlAlt.postAlt}
           width={225}
           height={225}
+          objectFit="cover"
         />
       </div>
     );
@@ -216,7 +227,7 @@ const PostRatingArea = ({
           <Rating
             size="small"
             name="read-only"
-            precision={0.5}
+            precision={1}
             value={valueRating}
             readOnly
           />

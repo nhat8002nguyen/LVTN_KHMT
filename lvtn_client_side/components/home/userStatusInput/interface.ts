@@ -18,3 +18,13 @@ export interface RatingAreaProps {
 	postInfo: UseStateType[0];
 	setPostInfo: UseStateType[1];
 }
+
+export interface FileWithURL {
+  file: File;
+  url: string;
+}
+
+export interface PhotosAddingProps {
+	postInfo: UseStateType[0];
+	setPostInfo: UseStateType[1];
+}
