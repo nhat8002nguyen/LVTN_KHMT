@@ -15,14 +15,6 @@ const nextConfig = {
       "res.cloudinary.com",
     ],
   },
-  async rewrites() {
-    return [
-      {
-        source: "/api/cloudinary/:path*",
-        destination: "https://api.cloudinary.com/:path*",
-      },
-    ];
-  },
 };
 
 module.exports = nextConfig;

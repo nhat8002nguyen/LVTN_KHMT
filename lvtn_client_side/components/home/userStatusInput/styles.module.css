@@ -37,6 +37,13 @@
 	flex: 1
 }
 
+.modalBody {
+	padding: 2rem 1.5rem;
+}
+
+.titleInput {
+}
+
 .ratingArea {
 	display: flex;
 	flex-direction: column;

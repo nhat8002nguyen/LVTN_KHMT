@@ -80,9 +80,7 @@ export default function EvaluationPost(props) {
             <div className={styles.content}>
               <Text className={styles.title}>{postProps.title}</Text>
               <div className={styles.descriptions}>
-                {postProps.body.split(".").map((text, i) => (
-                  <Text key={i}>{text}</Text>
-                ))}
+                <Text>{postProps.body}</Text>
               </div>
               <div className={styles.ratingAndHotelDetail}>
                 <PostRatingArea
@@ -222,7 +220,7 @@ const PostRatingArea = ({
             className={styles.ratingText}
             component="legend"
           >
-            Value --------
+            Value ---------
           </Typography>
           <Rating
             size="small"

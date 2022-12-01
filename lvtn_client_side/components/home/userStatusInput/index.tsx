@@ -172,15 +172,18 @@ const PostModal = ({
   );
 
   const handleTitleChange = (e: ChangeEvent<FormElement>) => {
-    setPostInfo((prev) => ({ ...prev, title: e.target.value }));
+    setPostInfo((prev) => ({ ...prev, title: e.target.value?.trim() }));
   };
 
   const handleBodyChange = (e: ChangeEvent<FormElement>) => {
-    setPostInfo((prev) => ({ ...prev, body: e.target.value }));
+    setPostInfo((prev) => ({ ...prev, body: e.target.value?.trim() }));
   };
 
   const handleHotelChange = (e: ChangeEvent<FormElement>) => {
-    setPostInfo((prev) => ({ ...prev, hotel: parseInt(e.target.value) }));
+    setPostInfo((prev) => ({
+      ...prev,
+      hotel: parseInt(e.target.value?.trim()),
+    }));
   };
 
   return (
@@ -196,25 +199,26 @@ const PostModal = ({
           Let's give a review
         </Text>
       </Modal.Header>
-      <Modal.Body>
+      <Modal.Body className={styles.modalBody}>
         <Input
+          className={styles.titleInput}
           clearable
-          underlined
-          placeholder="Title"
+          bordered
+          label="Title"
           onChange={handleTitleChange}
           color="primary"
         />
         <Textarea
-          bordered
           color="primary"
-          placeholder="Write some description here... *"
+          label="Description"
+          bordered
           onChange={handleBodyChange}
           rows={7}
         />
         <Input
           clearable
-          underlined
-          placeholder="Hotel"
+          label="Hotel"
+          bordered
           onChange={handleHotelChange}
           color="primary"
         />
