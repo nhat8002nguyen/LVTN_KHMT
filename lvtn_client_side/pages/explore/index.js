@@ -1,16 +1,16 @@
-import { ArrowBackRounded } from '@material-ui/icons';
-import { Avatar, Text, Head, Image } from '@nextui-org/react';
-import React from 'react';
-import styles from './styles.module.css';
 import {
   CardTitleText,
   HashTagText,
   SmallGreyText,
-} from '@/components/atoms/appTexts';
-import { explores } from '@/dummyData/explore.json';
-import LeftSide from '@/components/leftSide';
-import RightSide from '@/components/rightSide';
-import appPages from '@/shared/appPages';
+} from "@/components/atoms/appTexts";
+import LeftSide from "@/components/leftSide";
+import RightSide from "@/components/rightSide";
+import { explores } from "@/dummyData/explore.json";
+import appPages from "@/shared/appPages";
+import { ArrowBackRounded } from "@mui/icons-material";
+import { Avatar, Head, Image, Text } from "@nextui-org/react";
+import React from "react";
+import styles from "./styles.module.css";
 
 export default function Explore(props) {
   return (
@@ -37,7 +37,7 @@ export default function Explore(props) {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Powered by{' '}
+          Powered by{" "}
           <span className={styles.logo}>
             <Image src="/vercel.svg" alt="Vercel Logo" width={72} height={16} />
           </span>
@@ -70,7 +70,7 @@ const ExploreItem = (props) => {
         <HashTagText text={hashtag} />
         <SmallGreyText text={tweetQuantity} />
       </div>
-      <Avatar css={{ borderRadius: '2rem' }} size={50} src={mediaUrl} />
+      <Avatar css={{ borderRadius: "2rem" }} size={50} src={mediaUrl} />
     </div>
   );
 };

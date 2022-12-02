@@ -7,7 +7,7 @@ import {
   Twitter,
   WebRounded,
   WhatshotRounded,
-} from "@material-ui/icons";
+} from "@mui/icons-material";
 import GoogleIcon from "@mui/icons-material/Google";
 import { Session } from "next-auth";
 import { signIn, signOut, useSession } from "next-auth/react";

@@ -25,7 +25,7 @@ export default function useNewsFeed() {
       }
       fetchNewsFeedPosts(userId);
     }
-  }, [session, sessionState, authSession, refreshCount]);
+  }, [sessionState, authSession, refreshCount]);
 
   const fetchNewsFeedPosts = (userId: number) => {
     const request: PostListRequestDto = {

@@ -1,6 +1,6 @@
 import HomeNavigation from "@/components/home/homeNavigation";
 import PersonCard from "@/components/home/personCard";
-import EvaluationPost from "@/components/home/post/EvaluationPost";
+import EvaluationPost from "@/components/home/post";
 import UserStatusInput from "@/components/home/userStatusInput";
 import LeftSide from "@/components/leftSide";
 import CustomizedSnackbars from "@/components/mocules/snackbars";
@@ -8,7 +8,7 @@ import RightSide from "@/components/rightSide";
 import { recommendedFriends } from "@/dummyData/recommendedFriends.json";
 import useNewsFeed from "@/hooks/useNewsFeed";
 import appPages from "@/shared/appPages";
-import { ArrowForwardRounded } from "@material-ui/icons";
+import { ArrowForwardRounded } from "@mui/icons-material";
 import { Loading } from "@nextui-org/react";
 import { signIn, useSession } from "next-auth/react";
 import Head from "next/head";
@@ -67,7 +67,11 @@ export default function Home() {
               <Loading type="spinner" color="currentColor" size="xl" />
             ) : (
               posts.map((post: PostState) => (
-                <EvaluationPost key={post.id} {...post} />
+                <EvaluationPost
+                  key={post.id}
+                  postState={post}
+                  refreshNewsFeed={refreshNewsFeed}
+                />
               ))
             )}
           </div>

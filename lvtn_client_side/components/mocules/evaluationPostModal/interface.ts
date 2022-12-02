@@ -8,15 +8,13 @@ type UseStateType = ReturnType<typeof useState<PostFormDetailState>>
 export interface PostModalProps {
 	setVisible: UseModelType['setVisible'];
 	bindings: UseModelType['bindings'];
-	postInfo: UseStateType[0];
-	setPostInfo: UseStateType[1];
-	onCloseClick: () => void;
-	onPostClick: () => void;
+	initialPostInfo?: UseStateType[0];
+	purpose: "add" | "edit";
 }
 
 export interface RatingAreaProps {
 	postInfo: UseStateType[0];
-	setPostInfo: UseStateType[1];
+	setPostValues: UseStateType[1];
 }
 
 export interface FileWithURL {
@@ -26,5 +24,5 @@ export interface FileWithURL {
 
 export interface PhotosAddingProps {
 	postInfo: UseStateType[0];
-	setPostInfo: UseStateType[1];
+	setPostValues: UseStateType[1];
 }

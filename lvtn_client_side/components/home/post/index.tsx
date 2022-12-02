@@ -1,4 +1,7 @@
+import { PostModal } from "@/components/mocules/evaluationPostModal";
+import { ImageViewModal } from "@/components/mocules/imageView";
 import { imageUrlAlt } from "@/constants/homeConstants";
+import useNewsFeed from "@/hooks/useNewsFeed";
 import { appColors } from "@/shared/theme";
 import {
   CheckCircle,
@@ -9,43 +12,60 @@ import {
   ShareOutlined,
   ThumbUp,
   ThumbUpOutlined,
-} from "@material-ui/icons";
-import { Avatar, Card, Input, Text } from "@nextui-org/react";
+} from "@mui/icons-material";
+import { IconButton, Menu, MenuItem, Rating, Typography } from "@mui/material";
+import {
+  Avatar,
+  Card,
+  Input,
+  Loading,
+  Text,
+  useModal,
+} from "@nextui-org/react";
 import Image from "next/image";
-import React from "react";
+import React, { ReactElement, useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { AuthState } from "redux/slices/auth/authSlice";
+import { PostFormDetailState } from "redux/slices/home/posts/postFormSlice";
+import { PostState } from "redux/slices/home/posts/postListSlice";
+import { RootState } from "redux/store/store";
+import { MenuListCompositionProps } from "./interface";
 import styles from "./styles.module.css";
 
-export default function Post(props) {
-  const {
-    stableData: {
-      avatar,
-      name,
-      identified,
-      tagName,
-      createdAt,
-      descriptions,
-      images,
-    },
-    unstableData: { numLikeds, numTexts, numShareds, threadChats },
-  } = props;
+const monthNames = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Set",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
+export interface EvaluationPostProps {
+  postState: PostState;
+  refreshNewsFeed: ReturnType<typeof useNewsFeed>["refreshNewsFeed"];
+}
+
+export default function EvaluationPost(props: EvaluationPostProps) {
+  const { postState, refreshNewsFeed } = props;
+  const postListState = useSelector((state: RootState) => state.postList);
+  const [postProps, setPostProps] = useState<PostState>();
+
+  useEffect(() => {
+    const post = (postListState.posts as Array<PostState>).find(
+      (value) => value.id == postState.id
+    );
+    setPostProps(post);
+  }, []);
 
   const getDayMonth = () => {
-    const monthNames = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Set",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
-
-    let date = new Date(createdAt);
+    let date = postProps.createdAt;
     return date.getDate() + " " + monthNames[date.getMonth()];
   };
 
@@ -53,57 +73,215 @@ export default function Post(props) {
     <Card
       css={{ minHeight: "30rem", maxWidth: "40rem", backgroundColor: "white" }}
     >
-      <div className={styles.postContainer}>
-        <Avatar src={avatar} rounded />
-        <div className={styles.postMain}>
-          <div className={styles.header}>
-            <div className={styles.headerLeft}>
-              <Text css={{ fontWeight: "bold" }}>{name}</Text>
-              {identified == 1 ? (
-                <CheckCircle color="primary" fontSize="small" />
-              ) : null}
-              <Text css={{ fontSize: "small" }}>{tagName}</Text>
-            </div>
-            <div className={styles.headerRight}>
-              <Text css={{ fontSize: "small" }}>{getDayMonth()}</Text>
-              <MoreVertRounded />
-            </div>
-          </div>
-          <div className={styles.content}>
-            <div className={styles.descriptions}>
-              {descriptions.map((des, i) => (
-                <Text css={des.styles} key={i}>
-                  {des.text}
+      {!postProps ? (
+        <Loading type="points" color="currentColor" size="sm" />
+      ) : (
+        <div className={styles.postContainer}>
+          <Avatar src={postProps.postOwner.image} rounded />
+          <div className={styles.postMain}>
+            <div className={styles.header}>
+              <div className={styles.headerLeft}>
+                <Text css={{ fontWeight: "bold" }}>
+                  {postProps.postOwner.username}
                 </Text>
-              ))}
+                {true ? <CheckCircle color="primary" fontSize="small" /> : null}
+                <Text css={{ fontSize: "small" }}>
+                  {postProps.postOwner.email}
+                </Text>
+              </div>
+              <div className={styles.headerRight}>
+                <Text css={{ fontSize: "small" }}>{getDayMonth()}</Text>
+                <MenuListComposition postProps={postProps} />
+              </div>
             </div>
-            <PostImages images={images} />
-            <InteractionMetrics
-              numLikeds={numLikeds}
-              numTexts={numTexts}
-              numShareds={numShareds}
-            />
-            <CommentArea avatar={avatar} threadChats={threadChats} />
+            <div className={styles.content}>
+              <Text className={styles.title}>{postProps.title}</Text>
+              <div className={styles.descriptions}>
+                <Text>{postProps.body}</Text>
+              </div>
+              <div className={styles.ratingAndHotelDetail}>
+                <PostRatingArea
+                  locationRating={postProps.locationRating}
+                  serviceRating={postProps.serviceRating}
+                  cleanlinessRating={postProps.cleanlinessRating}
+                  valueRating={postProps.valueRating}
+                />
+                {!postProps.hotel ? null : (
+                  <div className={styles.hotelDetail}>
+                    <Text
+                      className={styles.hotelText}
+                      color={appColors.primary}
+                    >
+                      {"Hotel: " + postProps.hotel.name}
+                    </Text>
+                    <Text
+                      className={styles.hotelText}
+                      color={appColors.primary}
+                    >
+                      {"Location: " + postProps.hotel.location}
+                    </Text>
+                  </div>
+                )}
+              </div>
+              <PostImages
+                images={{
+                  first: postProps.images[0]?.url,
+                  second: postProps.images[1]?.url,
+                  third: postProps.images[2]?.url,
+                }}
+              />
+              <InteractionMetrics
+                numLikeds={postProps.likedCount}
+                numTexts={postProps.sharedCount}
+                numShareds={postProps.commentCount}
+              />
+              <CommentArea
+                avatar={postProps.postOwner.image}
+                threadChats={[]}
+              />
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </Card>
   );
 }
+
+const options = ["Edit", "Delete", "Report"];
+
+const MenuListComposition = ({ postProps }: MenuListCompositionProps) => {
+  const ITEM_HEIGHT = 48;
+
+  const { session }: AuthState = useSelector((state: RootState) => state.auth);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const { setVisible, bindings } = useModal();
+  const [postValues, setPostValues] = useState<PostFormDetailState>();
+  const [menuOptions, setMenuOptions] = useState<string[]>(options);
+
+  useEffect(() => {
+    if (postProps != null && session.user.db_id != null) {
+      const currentPostValues: PostFormDetailState = {
+        userId: session.user.db_id,
+        postId: postProps.id,
+        title: postProps.title,
+        body: postProps.body,
+        hotel: postProps.hotel?.id,
+        locationRating: postProps.locationRating,
+        serviceRating: postProps.serviceRating,
+        cleanlinessRating: postProps.cleanlinessRating,
+        valueRating: postProps.valueRating,
+        images: [],
+      };
+      if (postProps.postOwner.email != session.user.email) {
+        setMenuOptions(["Report"]);
+      }
+      setPostValues(currentPostValues);
+    }
+  }, [postProps, session]);
+
+  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleItemClick = (option: String) => {
+    setAnchorEl(null);
+    if (option == "Edit") {
+      handleEditClick();
+    } else if (option == "Delete") {
+      handleDeleteClick();
+    } else if (option == "Report") {
+      handleReportClick();
+    }
+  };
+
+  const handleEditClick = () => {
+    setVisible(true);
+  };
+
+  const handleDeleteClick = () => {
+    //TODO: handle user want to delete his post
+  };
+
+  const handleReportClick = () => {};
+
+  return (
+    <div>
+      <IconButton
+        aria-label="more"
+        id="long-button"
+        aria-controls={open ? "long-menu" : undefined}
+        aria-expanded={open ? "true" : undefined}
+        aria-haspopup="true"
+        onClick={handleClick}
+      >
+        <MoreVertRounded />
+      </IconButton>
+      <Menu
+        id="long-menu"
+        MenuListProps={{
+          "aria-labelledby": "long-button",
+        }}
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleMenuClose}
+        PaperProps={{
+          style: {
+            maxHeight: ITEM_HEIGHT * 4.5,
+            width: "15ch",
+          },
+        }}
+      >
+        {menuOptions.map((option) => (
+          <MenuItem key={option} onClick={(e) => handleItemClick(option)}>
+            {option}
+          </MenuItem>
+        ))}
+      </Menu>
+      <PostModal
+        setVisible={setVisible}
+        bindings={bindings}
+        initialPostInfo={postValues}
+        purpose="edit"
+      ></PostModal>
+    </div>
+  );
+};
 
 const PostImages = ({ images }) => {
   if (images.first == null && images.second == null && images.third == null) {
     return;
   }
+
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [imageSrc, setImageSrc] = useState<string>();
+
+  const handleImageClick = (src: string) => {
+    setImageSrc(src);
+    setModalVisible(true);
+  };
+
   if (images.first != null && images.second == null && images.third == null) {
     return (
-      <Image
-        style={{ cursor: "pointer" }}
-        src={images.first}
-        alt={imageUrlAlt.postAlt}
-        width={450}
-        height={300}
-      />
+      <div>
+        <Image
+          style={{ cursor: "pointer" }}
+          src={images.first}
+          alt={imageUrlAlt.postAlt}
+          width={450}
+          height={300}
+          objectFit="cover"
+          onClick={() => handleImageClick(images.first)}
+        />
+        <ImageViewModal
+          visible={modalVisible}
+          setVisible={setModalVisible}
+          src={imageSrc}
+        />
+      </div>
     );
   }
 
@@ -116,6 +294,8 @@ const PostImages = ({ images }) => {
           alt={imageUrlAlt.postAlt}
           width={225}
           height={225}
+          objectFit="cover"
+          onClick={() => handleImageClick(images.first)}
         />
         <Image
           style={{ cursor: "pointer" }}
@@ -123,11 +303,17 @@ const PostImages = ({ images }) => {
           alt={imageUrlAlt.postAlt}
           width={225}
           height={225}
+          objectFit="cover"
+          onClick={() => handleImageClick(images.second)}
+        />
+        <ImageViewModal
+          visible={modalVisible}
+          setVisible={setModalVisible}
+          src={imageSrc}
         />
       </div>
     );
   }
-
   if (images.first != null && images.second != null && images.third != null) {
     return (
       <div className={styles.images}>
@@ -139,6 +325,7 @@ const PostImages = ({ images }) => {
             width={150}
             height={150}
             objectFit="cover"
+            onClick={() => handleImageClick(images.first)}
           />
           <Image
             style={{ cursor: "pointer" }}
@@ -147,6 +334,7 @@ const PostImages = ({ images }) => {
             width={150}
             height={150}
             objectFit="cover"
+            onClick={() => handleImageClick(images.second)}
           />
         </div>
         <div className={styles.bigImage}>
@@ -157,11 +345,89 @@ const PostImages = ({ images }) => {
             width={300}
             height={300}
             objectFit="cover"
+            onClick={() => handleImageClick(images.third)}
           />
         </div>
+        <ImageViewModal
+          visible={modalVisible}
+          setVisible={setModalVisible}
+          src={imageSrc}
+        />
       </div>
     );
   }
+};
+
+const PostRatingArea = ({
+  locationRating,
+  serviceRating,
+  cleanlinessRating,
+  valueRating,
+}: PostRatingArea): ReactElement => {
+  return (
+    <div className={styles.ratingArea}>
+      <div className={styles.ratingAreaRow}>
+        <div className={styles.rating}>
+          <Typography
+            style={{ fontSize: "12px" }}
+            className={styles.ratingText}
+            component="legend"
+          >
+            Value ---------
+          </Typography>
+          <Rating
+            size="small"
+            name="read-only"
+            precision={1}
+            value={valueRating}
+            readOnly
+          />
+        </div>
+        <div className={styles.rating}>
+          <Typography style={{ fontSize: "12px" }} component="legend">
+            Location -----
+          </Typography>
+          <Rating
+            size="small"
+            name="read-only"
+            precision={0.5}
+            value={locationRating}
+            readOnly
+          />
+        </div>
+        <div className={styles.rating}>
+          <Typography style={{ fontSize: "12px" }} component="legend">
+            Service ------
+          </Typography>
+          <Rating
+            size="small"
+            name="read-only"
+            precision={0.5}
+            value={serviceRating}
+            readOnly
+          />
+        </div>
+      </div>
+      <div className={styles.ratingAreaRow}>
+        <div className={styles.rating}>
+          <Typography
+            style={{ fontSize: "12px" }}
+            className={styles.ratingText}
+            component="legend"
+          >
+            Clealiness --
+          </Typography>
+          <Rating
+            size="small"
+            name="read-only"
+            precision={0.5}
+            value={cleanlinessRating}
+            readOnly
+          />
+        </div>
+      </div>
+    </div>
+  );
 };
 
 const InteractionMetrics = ({ numLikeds, numTexts, numShareds }) => {
@@ -306,3 +572,10 @@ const Comment = (props) => {
     </div>
   );
 };
+
+interface PostRatingArea {
+  locationRating: number;
+  serviceRating: number;
+  cleanlinessRating: number;
+  valueRating: number;
+}

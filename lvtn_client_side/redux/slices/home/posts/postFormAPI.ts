@@ -3,10 +3,73 @@ import { cloudinaryAxios, harusaAxios } from "utils/axios/axios";
 import { PostFormDetailState } from "./postFormSlice";
 import { EvaluationPostDto, PostImageDto } from "./postListAPI";
 
+export interface PostInsertionResponseDto {
+  insert_evaluation_post: PostMutationDto;
+}
+
+export interface PostUpdationResponseDto {
+  update_evaluation_post: PostMutationDto;
+}
+
+export interface PostMutationDto {
+  returning: Array<EvaluationPostDto>;
+}
+
+export interface ImagesSavingCloudinaryDto {
+  asset_id: string;
+  public_id: string;
+  version: number;
+  version_id: string;
+  signature: string;
+  width: number;
+  height: number;
+  format: string;
+  resource_type: string;
+  created_at: string;
+  tags: Array<string>;
+  bytes: number;
+  type: string;
+  etag: string;
+  placeholder: false;
+  url: string;
+  secure_url: string;
+  folder: string;
+  access_mode: string;
+  original_filename: string;
+}
+
+export interface PostImageInsertionDto {
+  insert_post_image: InsertPostImageDto;
+}
+
+export interface InsertPostImageDto {
+  returning: PostImageReturningDto[];
+}
+
+export interface PostImageReturningDto {
+  id: number;
+  post: number;
+  url: string;
+}
+
+export interface PostImagesDeletionDto {
+  delete_post_image: PostImagesMutationDto;
+}
+
+export interface PostImagesMutationDto {
+  returning: IDDto[];
+}
+
+export interface IDDto {
+  id: number;
+}
+
 export const saveEvaluationPost = async (
   post: PostFormDetailState
-): Promise<PostSaveResponseDto> => {
-  const imagesSavingResponses = await saveImagesToCloudinary(post);
+): Promise<EvaluationPostDto> => {
+  // Accept that if transaction is unfortunately fail,
+  // the images will be rundundant in the cloud
+  const imagesSavingResponses = await saveImagesToCloudinary(post.images);
 
   const purePostRes = await saveEvaluationPostWithoutImages(post);
 
@@ -17,8 +80,8 @@ export const saveEvaluationPost = async (
       post.images.length > 0 &&
       imagesSavingResponses[0].status == 200
     ) {
-      const postId = (purePostRes.data as PostSaveResponseDto)
-        .insert_evaluation_post.returning[0].id;
+      const purePostResData = purePostRes.data as PostInsertionResponseDto;
+      const postId = purePostResData.insert_evaluation_post.returning[0].id;
       if (postId != null) {
         const imagesSavingDtos = imagesSavingResponses.map(
           (res) => res.data as ImagesSavingCloudinaryDto
@@ -58,9 +121,9 @@ const saveEvaluationPostWithoutImages = async (post: PostFormDetailState) => {
   }
 };
 
-const saveImagesToCloudinary = async (post: PostFormDetailState) => {
+const saveImagesToCloudinary = async (images: File[]) => {
   try {
-    const imagesSavingPromises = post.images.map((image) => {
+    const imagesSavingPromises = images.map((image) => {
       let formData = new FormData();
       formData.append("file", image);
       formData.append(
@@ -104,9 +167,9 @@ const addImageReferencesToDB = async (
 };
 
 const combinePostWithImages = (
-  postDto: PostSaveResponseDto,
+  postDto: EvaluationPostDto,
   imageRefs: PostImageInsertionDto[]
-): PostSaveResponseDto => {
+): EvaluationPostDto => {
   const postImages = imageRefs.map(
     (image) =>
       ({
@@ -114,51 +177,80 @@ const combinePostWithImages = (
         url: image.insert_post_image.returning[0].url,
       } as PostImageDto)
   );
-  postDto.insert_evaluation_post.returning[0].post_images = postImages;
+  postDto.post_images = postImages;
   return postDto;
 };
 
-export interface PostSaveResponseDto {
-  insert_evaluation_post: InsertPostDto;
-}
+export const updateEvaluationPost = async (
+  post: PostFormDetailState
+): Promise<EvaluationPostDto> => {
+  const imagesSavingResponses = await saveImagesToCloudinary(post.images);
 
-export interface InsertPostDto {
-  returning: Array<EvaluationPostDto>;
-}
+  // Note that in hasura it will return 200 for updating no post.
+  // So we should check the returning value.
+  const purePostRes = await updatePurePost(post);
+  const purePostData = purePostRes.data as PostUpdationResponseDto;
 
-export interface ImagesSavingCloudinaryDto {
-  asset_id: string;
-  public_id: string;
-  version: number;
-  version_id: string;
-  signature: string;
-  width: number;
-  height: number;
-  format: string;
-  resource_type: string;
-  created_at: string;
-  tags: Array<string>;
-  bytes: number;
-  type: string;
-  etag: string;
-  placeholder: false;
-  url: string;
-  secure_url: string;
-  folder: string;
-  access_mode: string;
-  original_filename: string;
-}
+  if (purePostData.update_evaluation_post.returning.length == 0) {
+    throw Error("No post is updated");
+  }
 
-export interface PostImageInsertionDto {
-  insert_post_image: InsertPostImageDto;
-}
+  // if user want to replace with the new images, sync their references to DB
+  if (
+    post.images.length > 0 &&
+    imagesSavingResponses[0]?.status == 200 &&
+    post.postId != null
+  ) {
+    await deleteImageRefsFromPost(post.postId);
 
-export interface InsertPostImageDto {
-  returning: PostImageReturningDto[];
-}
+    const cloudinaryImages = imagesSavingResponses.map(
+      (res) => res.data as ImagesSavingCloudinaryDto
+    );
+    const imageRefsResponses = await addImageReferencesToDB(
+      post.postId,
+      cloudinaryImages
+    );
+    const imageRefs = imageRefsResponses.map(
+      (res) => res.data as PostImageInsertionDto
+    );
+    return combinePostWithImages(
+      purePostData.update_evaluation_post.returning[0],
+      imageRefs
+    );
+  }
 
-export interface PostImageReturningDto {
-  id: number;
-  post: number;
-  url: string;
-}
+  return purePostData.update_evaluation_post.returning[0];
+};
+
+const updatePurePost = async (post: PostFormDetailState) => {
+  try {
+    const purePostRes = await harusaAxios.put("/posts", null, {
+      params: {
+        user_id: post.userId,
+        post_id: post.postId,
+        title: post.title,
+        body: post.body,
+        location_rating: post.locationRating,
+        cleanliness_rating: post.cleanlinessRating,
+        service_rating: post.serviceRating,
+        value_rating: post.valueRating,
+      },
+    });
+    return purePostRes;
+  } catch (err) {
+    throw Error("Can not save post to DB");
+  }
+};
+
+const deleteImageRefsFromPost = async (postId: number) => {
+  try {
+    const response = await harusaAxios.delete("/images", {
+      params: {
+        post_id: postId,
+      },
+    });
+    return response;
+  } catch (err) {
+    throw Error("Can not delete image refs from post: " + postId);
+  }
+};

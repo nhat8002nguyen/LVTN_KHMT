@@ -1,7 +1,11 @@
-import React from 'react';
-import { Text } from '@nextui-org/react';
+import { Text } from "@nextui-org/react";
 
-export const SmallGreyText = ({ text, styles }) => {
+interface SmallGreyTextProps {
+  text: string;
+  styles?: any;
+}
+
+export const SmallGreyText = ({ text, styles }: SmallGreyTextProps) => {
   return (
     <Text h6 size={12} color="grey" css={styles}>
       {text}
