@@ -13,6 +13,7 @@ const nextConfig = {
       "chupanhnoithat.vn",
       "d2e5ushqwiltxm.cloudfront.net",
       "res.cloudinary.com",
+      "asset.cloudinary.com",
     ],
   },
 };

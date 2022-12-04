@@ -1,5 +1,9 @@
 import { appColors } from "@/shared/theme";
-import { Button, Loading } from "@nextui-org/react";
+import { Avatar, Button } from "@nextui-org/react";
+import { useSelector } from "react-redux";
+import { AuthState } from "redux/slices/auth/authSlice";
+import { RootState } from "redux/store/store";
+import { AppButtonLoading } from "./AppLoading";
 
 interface GlobalButtonProps {
   text: string;
@@ -16,6 +20,7 @@ export default function GlobalButton({
   icon,
   loading,
 }: GlobalButtonProps) {
+  const { session }: AuthState = useSelector((state: RootState) => state.auth);
   return (
     <Button
       size={size ?? "md"}
@@ -30,9 +35,18 @@ export default function GlobalButton({
       }}
       onPress={() => onPress()}
     >
-      {!loading && icon}
+      {!loading && session?.user.image != null ? (
+        <Avatar
+          css={{ marginRight: "$5" }}
+          size={"sm"}
+          src={session.user.image}
+          rounded
+        />
+      ) : (
+        icon
+      )}
       {!loading && text}
-      {loading && <Loading type="points" color="currentColor" size="sm" />}
+      {loading && <AppButtonLoading />}
     </Button>
   );
 }

@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
-import { cloudinaryAxios, harusaAxios } from "utils/axios/axios";
-import { PostFormDetailState } from "./postFormSlice";
+import { cloudinaryAxios, hasuraAxios } from "utils/axios/axios";
+import { PostDeletionState, PostFormDetailState } from "./postFormSlice";
 import { EvaluationPostDto, PostImageDto } from "./postListAPI";
 
 export interface PostInsertionResponseDto {
@@ -103,7 +103,7 @@ export const saveEvaluationPost = async (
 
 const saveEvaluationPostWithoutImages = async (post: PostFormDetailState) => {
   try {
-    const purePostRes = await harusaAxios.post("/posts", null, {
+    const purePostRes = await hasuraAxios.post("/posts", null, {
       params: {
         user_id: post.userId,
         title: post.title,
@@ -152,7 +152,7 @@ const addImageReferencesToDB = async (
 ) => {
   try {
     const imageReferencesPromises = imageSavingDtos.map((dto) => {
-      return harusaAxios.post("/posts/images", null, {
+      return hasuraAxios.post("/posts/images", null, {
         params: {
           post_id: postId,
           url: dto.url,
@@ -224,7 +224,7 @@ export const updateEvaluationPost = async (
 
 const updatePurePost = async (post: PostFormDetailState) => {
   try {
-    const purePostRes = await harusaAxios.put("/posts", null, {
+    const purePostRes = await hasuraAxios.put("/posts", null, {
       params: {
         user_id: post.userId,
         post_id: post.postId,
@@ -244,7 +244,7 @@ const updatePurePost = async (post: PostFormDetailState) => {
 
 const deleteImageRefsFromPost = async (postId: number) => {
   try {
-    const response = await harusaAxios.delete("/images", {
+    const response = await hasuraAxios.delete("/images", {
       params: {
         post_id: postId,
       },
@@ -252,5 +252,34 @@ const deleteImageRefsFromPost = async (postId: number) => {
     return response;
   } catch (err) {
     throw Error("Can not delete image refs from post: " + postId);
+  }
+};
+
+interface PostDeletionResponseDto {
+  delete_evaluation_post: PostDeletionReturningDto;
+}
+
+interface PostDeletionReturningDto {
+  returning: IDDto[];
+}
+
+export const deleteEvaluationPost = async (
+  deletion: PostDeletionState
+): Promise<PostDeletionResponseDto> => {
+  const response = await hasuraAxios.delete("/posts", {
+    params: {
+      user_id: deletion.userId,
+      post_id: deletion.postId,
+    },
+  });
+  if (response.status == 200) {
+    if (
+      (response.data as PostDeletionResponseDto).delete_evaluation_post
+        .returning.length > 0
+    ) {
+      return response.data;
+    } else {
+      throw Error("Delete a post fail");
+    }
   }
 };

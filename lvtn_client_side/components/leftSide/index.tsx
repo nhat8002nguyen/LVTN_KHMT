@@ -12,13 +12,16 @@ import GoogleIcon from "@mui/icons-material/Google";
 import { Session } from "next-auth";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { UserRequestDto } from "redux/slices/auth/authAPI";
 import {
   AuthState,
   setAuthState,
   syncGoogleAccountDB,
 } from "redux/slices/auth/authSlice";
-import { useAppDispatch } from "redux/store/store";
+import { showOtherUsers } from "redux/slices/home/followableUsers/recommendUserListSlice";
+import { findNewsFeedPosts } from "redux/slices/home/posts/postListSlice";
+import { RootState, useAppDispatch } from "redux/store/store";
 import appPages from "../../shared/appPages";
 import GlobalButton from "../atoms/GlobalButton";
 import styles from "./styles.module.css";
@@ -70,8 +73,11 @@ const createMenuItems = (currentPage) => [
 
 export default function LeftSide(props) {
   const { currentPage } = props;
-  const appDispatch = useAppDispatch();
+  const dispatch = useAppDispatch();
   const { data: session, status: sessionStatus } = useSession();
+  const { session: authSession }: AuthState = useSelector(
+    (state: RootState) => state.auth
+  );
   const [menuItems, setMenuItems] = useState(() =>
     createMenuItems(currentPage)
   );
@@ -85,7 +91,7 @@ export default function LeftSide(props) {
       syncGoogleAccountToDB();
       setSignInButtonText(session.user.name);
     }
-  }, [sessionStatus, session]);
+  }, [sessionStatus]);
 
   const saveSessionToState = (session: Session) => {
     let authState: AuthState = {
@@ -102,7 +108,7 @@ export default function LeftSide(props) {
       },
       sessionStatus: sessionStatus,
     };
-    appDispatch(setAuthState(authState));
+    dispatch(setAuthState(authState));
   };
 
   const syncGoogleAccountToDB = () => {
@@ -113,7 +119,7 @@ export default function LeftSide(props) {
       image: session.user.image,
       googleAccountID: (session as any).user.id,
     };
-    appDispatch(syncGoogleAccountDB(user));
+    dispatch(syncGoogleAccountDB(user));
   };
 
   const onGoogleSignInButtonPress = () => {
@@ -128,6 +134,24 @@ export default function LeftSide(props) {
     signIn("google");
   };
 
+  const handleMenuItemClick = (id: number) => {
+    switch (id) {
+      case 0:
+        handleHomeItemClick();
+        break;
+      default:
+        return;
+    }
+  };
+
+  const handleHomeItemClick = () => {
+    const userId = authSession?.user.db_id;
+    if (userId != null) {
+      dispatch(showOtherUsers({ showType: "random" }));
+      dispatch(findNewsFeedPosts({ userId: userId }));
+    }
+  };
+
   return (
     <div className={styles.menu}>
       <div className={styles.fixedArea}>
@@ -139,6 +163,7 @@ export default function LeftSide(props) {
             <div
               key={item.id}
               className={!item.focus ? styles.menuItem : styles.menuItemFocus}
+              onClick={() => handleMenuItemClick(item.id)}
             >
               {item.icon}
               <p>{item.name}</p>

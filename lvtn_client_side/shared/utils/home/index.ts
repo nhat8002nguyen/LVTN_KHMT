@@ -8,7 +8,7 @@ export const validatePostValues = (
 	setPostValues: ReturnType<typeof useState<PostFormDetailState>>[1],
 	dispatch: ReturnType<typeof useAppDispatch>
 	): Boolean => {
-    const { userId, body, hotel } = postValues;
+    let { userId, body, hotel } = postValues;
     if (userId < 0) {
       dispatch(
         toggleSnackbar({
@@ -36,7 +36,17 @@ export const validatePostValues = (
         })
       );
 
-      setPostValues((prev) => ({ ...prev, hotel: null }));
+      setPostValues((prev) => ({ ...prev, hotel: 6 }));
+			// workaround, have to remove this
+			hotel = 6;
     }
     return true;
   };
+
+export const generateRandom = (min = 0, max = 100) => {
+    let difference = max - min;
+    let rand = Math.random();
+    rand = Math.floor( rand * difference);
+    rand = rand + min;
+    return rand;
+}

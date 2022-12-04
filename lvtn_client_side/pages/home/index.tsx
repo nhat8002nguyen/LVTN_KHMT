@@ -1,15 +1,14 @@
+import { AppPageLoading } from "@/components/atoms/AppLoading";
 import HomeNavigation from "@/components/home/homeNavigation";
-import PersonCard from "@/components/home/personCard";
 import EvaluationPost from "@/components/home/post";
+import RecommendFollowableUsers from "@/components/home/recommendFollowableUsers";
 import UserStatusInput from "@/components/home/userStatusInput";
 import LeftSide from "@/components/leftSide";
 import CustomizedSnackbars from "@/components/mocules/snackbars";
 import RightSide from "@/components/rightSide";
-import { recommendedFriends } from "@/dummyData/recommendedFriends.json";
 import useNewsFeed from "@/hooks/useNewsFeed";
+import { useSnackbarNotificationAndRefreshNewsFeed } from "@/hooks/useSnackbarNotificationAndRefreshNewsFeed";
 import appPages from "@/shared/appPages";
-import { ArrowForwardRounded } from "@mui/icons-material";
-import { Loading } from "@nextui-org/react";
 import { signIn, useSession } from "next-auth/react";
 import Head from "next/head";
 import Image from "next/image";
@@ -22,15 +21,14 @@ import styles from "./styles.module.css";
 
 export default function Home() {
   const { data: session, status: sessionState } = useSession();
-  const {
-    session: authSession,
-    sessionStatus: authSessionStatus,
-    syncDBStatus,
-  }: AuthState = useSelector((state: RootState) => state.auth);
+  const { syncDBStatus }: AuthState = useSelector(
+    (state: RootState) => state.auth
+  );
   const { posts, loading: postsLoading } = useSelector(
     (state: RootState) => state.postList
   );
   const { refreshNewsFeed } = useNewsFeed();
+  useSnackbarNotificationAndRefreshNewsFeed();
 
   useEffect(() => {
     if ((session as any)?.error === "RefreshAccessTokenError") {
@@ -50,21 +48,11 @@ export default function Home() {
         <div className={styles.contentContainer}>
           <HomeNavigation />
           <UserStatusInput refreshNewsFeed={refreshNewsFeed} />
-          <div className={styles.recommendedPeople}>
-            <div className={styles.cardListHeader}>
-              <p>Follow People</p>
-              <ArrowForwardRounded style={{ cursor: "pointer" }} />
-            </div>
-            <div className={styles.recommendList}>
-              {recommendedFriends.map((person) => {
-                return <PersonCard key={person.id} {...person} />;
-              })}
-            </div>
-          </div>
+          <RecommendFollowableUsers />
 
           <div className={styles.listPost}>
             {postsLoading == "loading" || syncDBStatus == "pending" ? (
-              <Loading type="spinner" color="currentColor" size="xl" />
+              <AppPageLoading />
             ) : (
               posts.map((post: PostState) => (
                 <EvaluationPost

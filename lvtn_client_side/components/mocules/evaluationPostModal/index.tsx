@@ -1,3 +1,4 @@
+import { AppButtonLoading } from "@/components/atoms/AppLoading";
 import { appColors } from "@/shared/theme";
 import { validatePostValues } from "@/shared/utils/home";
 import { AddPhotoAlternate } from "@mui/icons-material";
@@ -7,7 +8,6 @@ import {
   Button,
   FormElement,
   Input,
-  Loading,
   Modal,
   Text,
   Textarea,
@@ -21,8 +21,6 @@ import {
   postNewEvaluationPost,
   updateEvaluationPost,
 } from "redux/slices/home/posts/postFormSlice";
-import { findNewsFeedPosts } from "redux/slices/home/posts/postListSlice";
-import { toggleSnackbar } from "redux/slices/statusNotifications/snackbarsSlice";
 import { RootState, useAppDispatch } from "redux/store/store";
 import { ImageViewModal } from "../imageView";
 import {
@@ -49,7 +47,7 @@ export const PostModal = ({
   const [postValues, setPostValues] = useState<PostFormDetailState>();
 
   useEffect(() => {
-    if (sessionStatus == "authenticated" && session.user?.db_id != null) {
+    if (sessionStatus == "authenticated" && session?.user.db_id != null) {
       setPostValues((prev) => ({ ...prev, userId: session.user.db_id }));
     }
   }, [sessionStatus, session]);
@@ -88,46 +86,6 @@ export const PostModal = ({
     }));
   };
 
-  useEffect(() => {
-    if (requestStatus == "failed") {
-      dispatch(
-        toggleSnackbar({
-          message: "Failed to create new post, please try again !",
-          severity: "error",
-        })
-      );
-    }
-    if (requestStatus == "succeeded") {
-      setVisible(false);
-      dispatch(
-        toggleSnackbar({
-          message: "Create a new post successfully !",
-          severity: "success",
-        })
-      );
-    }
-  }, [requestStatus]);
-
-  useEffect(() => {
-    if (requestUpdationStatus == "failed") {
-      dispatch(
-        toggleSnackbar({
-          message: "Failed to edit this post, please try again !",
-          severity: "error",
-        })
-      );
-    }
-    if (requestUpdationStatus == "succeeded") {
-      setVisible(false);
-      dispatch(
-        toggleSnackbar({
-          message: "Edit your post successfully !",
-          severity: "success",
-        })
-      );
-    }
-  }, [requestUpdationStatus]);
-
   const onPostClick = async () => {
     const isValid = validatePostValues(postValues, setPostValues, dispatch);
 
@@ -139,8 +97,7 @@ export const PostModal = ({
     } else if (purpose == "edit") {
       await dispatch(updateEvaluationPost(postValues));
     }
-
-    dispatch(findNewsFeedPosts({ userId: session.user.db_id }));
+    setVisible(false);
   };
 
   const onCloseClick = () => {
@@ -184,7 +141,10 @@ export const PostModal = ({
               initialValue={postValues.hotel?.toString()}
               onChange={handleHotelChange}
               color="primary"
-              disabled={purpose == "edit"}
+              //TODO: wait for implementation
+              // disabled={purpose == "edit"}
+              disabled
+              placeholder="Wait for implemetation..."
             />
             <RatingArea
               postInfo={postValues}
@@ -204,7 +164,7 @@ export const PostModal = ({
               >
                 {requestStatus == "pending" ||
                 requestUpdationStatus == "pending" ? (
-                  <Loading type="points" color="white" size="sm" />
+                  <AppButtonLoading />
                 ) : purpose == "edit" ? (
                   "Edit"
                 ) : (

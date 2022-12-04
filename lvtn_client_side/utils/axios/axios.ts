@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const harusaAxios = axios.create({
+export const hasuraAxios = axios.create({
   baseURL: "https://refined-baboon-56.hasura.app/api/rest/v1",
   headers: {
     common: {

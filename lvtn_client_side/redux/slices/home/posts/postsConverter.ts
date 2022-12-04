@@ -15,9 +15,12 @@ export const updatePostsFromResponse = (
       <PostState>{
         id: dto.id,
         postOwner: {
+          id: dto.post_owner.id,
           username: dto.post_owner.user_name,
           image: dto.post_owner.image,
           email: dto.post_owner.email,
+          shortBio: dto.post_owner.short_bio,
+          createdAt: new Date(dto.post_owner.created_at),
         },
         title: dto.title,
         body: dto.body,
@@ -49,6 +52,8 @@ export const updatePostsFromResponse = (
         updatedAt: new Date(dto.updated_at),
       }
   );
+
+  posts.sort((a, b) => b.updatedAt.valueOf() - a.updatedAt.valueOf());
 
   return posts;
 };

@@ -7,7 +7,7 @@ interface SmallGreyTextProps {
 
 export const SmallGreyText = ({ text, styles }: SmallGreyTextProps) => {
   return (
-    <Text h6 size={12} color="grey" css={styles}>
+    <Text h6 size={11} color="grey" css={styles}>
       {text}
     </Text>
   );
@@ -15,7 +15,7 @@ export const SmallGreyText = ({ text, styles }: SmallGreyTextProps) => {
 
 export const CardTitleText = ({ text, styles }) => {
   return (
-    <Text h6 size={14} color="black" css={styles}>
+    <Text h6 size={13} color="black" css={styles}>
       {text}
     </Text>
   );

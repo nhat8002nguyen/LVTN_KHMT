@@ -5,6 +5,7 @@ import * as postFormAPI from "./postFormAPI";
 export interface PostFormState {
   requestStatus: "idle" | "pending" | "succeeded" | "failed";
   requestUpdationStatus: "idle" | "pending" | "succeeded" | "failed";
+  requestDeletionStatus: "idle" | "pending" | "succeeded" | "failed";
   message: string | null;
 }
 
@@ -21,9 +22,15 @@ export interface PostFormDetailState {
   images: Array<File>;
 }
 
+export interface PostDeletionState {
+  userId: number;
+  postId: number;
+}
+
 const initialState: PostFormState = {
   requestStatus: "idle",
   requestUpdationStatus: "idle",
+  requestDeletionStatus: "idle",
   message: null,
 };
 
@@ -55,6 +62,15 @@ export const postFormSlice = createSlice({
     builder.addCase(updateEvaluationPost.rejected, (state, action) => {
       state.requestUpdationStatus = "failed";
     });
+    builder.addCase(deleteEvaluationPost.pending, (state, action) => {
+      state.requestDeletionStatus = "pending";
+    });
+    builder.addCase(deleteEvaluationPost.fulfilled, (state, action) => {
+      state.requestDeletionStatus = "succeeded";
+    });
+    builder.addCase(deleteEvaluationPost.rejected, (state, action) => {
+      state.requestDeletionStatus = "failed";
+    });
   },
 });
 
@@ -69,6 +85,13 @@ export const updateEvaluationPost = createAsyncThunk(
   "posts/updatePost",
   async (post: PostFormDetailState, thunkAPI) => {
     return await postFormAPI.updateEvaluationPost(post);
+  }
+);
+
+export const deleteEvaluationPost = createAsyncThunk(
+  "posts/deletePost",
+  async (deletion: PostDeletionState, thunkAPI) => {
+    return await postFormAPI.deleteEvaluationPost(deletion);
   }
 );
 

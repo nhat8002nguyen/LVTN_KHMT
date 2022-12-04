@@ -1,3 +1,5 @@
+import { AppButtonLoading } from "@/components/atoms/AppLoading";
+import ConfirmModal from "@/components/mocules/confirmModal";
 import { PostModal } from "@/components/mocules/evaluationPostModal";
 import { ImageViewModal } from "@/components/mocules/imageView";
 import { imageUrlAlt } from "@/constants/homeConstants";
@@ -14,21 +16,27 @@ import {
   ThumbUpOutlined,
 } from "@mui/icons-material";
 import { IconButton, Menu, MenuItem, Rating, Typography } from "@mui/material";
-import {
-  Avatar,
-  Card,
-  Input,
-  Loading,
-  Text,
-  useModal,
-} from "@nextui-org/react";
+import { Avatar, Card, Input, Text, useModal } from "@nextui-org/react";
 import Image from "next/image";
 import React, { ReactElement, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { AuthState } from "redux/slices/auth/authSlice";
-import { PostFormDetailState } from "redux/slices/home/posts/postFormSlice";
-import { PostState } from "redux/slices/home/posts/postListSlice";
-import { RootState } from "redux/store/store";
+import {
+  closeCommentSession,
+  CommentDetailState,
+  CommentsState,
+  fetchCommentsByPostID,
+  openCommentSession,
+} from "redux/slices/home/comments/commentsSlice";
+import {
+  deleteEvaluationPost,
+  PostFormDetailState,
+} from "redux/slices/home/posts/postFormSlice";
+import {
+  deletePresentedPost,
+  PostState,
+} from "redux/slices/home/posts/postListSlice";
+import { RootState, useAppDispatch } from "redux/store/store";
 import { MenuListCompositionProps } from "./interface";
 import styles from "./styles.module.css";
 
@@ -56,6 +64,7 @@ export default function EvaluationPost(props: EvaluationPostProps) {
   const { postState, refreshNewsFeed } = props;
   const postListState = useSelector((state: RootState) => state.postList);
   const [postProps, setPostProps] = useState<PostState>();
+  const { session }: AuthState = useSelector((state: RootState) => state.auth);
 
   useEffect(() => {
     const post = (postListState.posts as Array<PostState>).find(
@@ -74,7 +83,7 @@ export default function EvaluationPost(props: EvaluationPostProps) {
       css={{ minHeight: "30rem", maxWidth: "40rem", backgroundColor: "white" }}
     >
       {!postProps ? (
-        <Loading type="points" color="currentColor" size="sm" />
+        <AppButtonLoading />
       ) : (
         <div className={styles.postContainer}>
           <Avatar src={postProps.postOwner.image} rounded />
@@ -86,7 +95,7 @@ export default function EvaluationPost(props: EvaluationPostProps) {
                 </Text>
                 {true ? <CheckCircle color="primary" fontSize="small" /> : null}
                 <Text css={{ fontSize: "small" }}>
-                  {postProps.postOwner.email}
+                  {postProps.postOwner.shortBio}
                 </Text>
               </div>
               <div className={styles.headerRight}>
@@ -130,15 +139,8 @@ export default function EvaluationPost(props: EvaluationPostProps) {
                   third: postProps.images[2]?.url,
                 }}
               />
-              <InteractionMetrics
-                numLikeds={postProps.likedCount}
-                numTexts={postProps.sharedCount}
-                numShareds={postProps.commentCount}
-              />
-              <CommentArea
-                avatar={postProps.postOwner.image}
-                threadChats={[]}
-              />
+              <InteractionMetrics {...postProps} />
+              <CommentArea postProps={postProps} avatar={session?.user.image} />
             </div>
           </div>
         </div>
@@ -152,15 +154,19 @@ const options = ["Edit", "Delete", "Report"];
 const MenuListComposition = ({ postProps }: MenuListCompositionProps) => {
   const ITEM_HEIGHT = 48;
 
+  const dispatch = useAppDispatch();
   const { session }: AuthState = useSelector((state: RootState) => state.auth);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const { setVisible, bindings } = useModal();
   const [postValues, setPostValues] = useState<PostFormDetailState>();
   const [menuOptions, setMenuOptions] = useState<string[]>(options);
+  const [isDeleteConfirmVisible, setDeleteConfirmVisible] =
+    useState<boolean>(false);
+  const [deleteLoading, setDeleteLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    if (postProps != null && session.user.db_id != null) {
+    if (postProps != null && session?.user.db_id != null) {
       const currentPostValues: PostFormDetailState = {
         userId: session.user.db_id,
         postId: postProps.id,
@@ -175,12 +181,15 @@ const MenuListComposition = ({ postProps }: MenuListCompositionProps) => {
       };
       if (postProps.postOwner.email != session.user.email) {
         setMenuOptions(["Report"]);
+      } else {
+        setMenuOptions(["Edit", "Delete"]);
       }
       setPostValues(currentPostValues);
     }
   }, [postProps, session]);
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    setDeleteConfirmVisible(false);
     setAnchorEl(event.currentTarget);
   };
   const handleMenuClose = () => {
@@ -188,12 +197,13 @@ const MenuListComposition = ({ postProps }: MenuListCompositionProps) => {
   };
 
   const handleItemClick = (option: String) => {
-    setAnchorEl(null);
     if (option == "Edit") {
+      setAnchorEl(null);
       handleEditClick();
     } else if (option == "Delete") {
       handleDeleteClick();
     } else if (option == "Report") {
+      setAnchorEl(null);
       handleReportClick();
     }
   };
@@ -203,10 +213,33 @@ const MenuListComposition = ({ postProps }: MenuListCompositionProps) => {
   };
 
   const handleDeleteClick = () => {
-    //TODO: handle user want to delete his post
+    setDeleteConfirmVisible(true);
   };
 
-  const handleReportClick = () => {};
+  const handlePostDeletion = async () => {
+    setDeleteLoading(true);
+    try {
+      await dispatch(
+        deleteEvaluationPost({
+          userId: postValues.userId,
+          postId: postValues.postId,
+        })
+      ).unwrap();
+      dispatch(
+        deletePresentedPost({
+          postId: postValues.postId,
+          userId: postValues.userId,
+        })
+      );
+      setAnchorEl(null);
+    } catch (rejected) {
+      console.error(rejected);
+    }
+  };
+
+  const handleReportClick = () => {
+    //TODO: handle report click
+  };
 
   return (
     <div>
@@ -235,11 +268,27 @@ const MenuListComposition = ({ postProps }: MenuListCompositionProps) => {
           },
         }}
       >
-        {menuOptions.map((option) => (
-          <MenuItem key={option} onClick={(e) => handleItemClick(option)}>
-            {option}
-          </MenuItem>
-        ))}
+        {menuOptions.map((option) =>
+          option != "Delete" ? (
+            <MenuItem key={option} onClick={(e) => handleItemClick(option)}>
+              {option}
+            </MenuItem>
+          ) : (
+            <ConfirmModal
+              trigger={
+                <MenuItem key={option} onClick={(e) => handleItemClick(option)}>
+                  {option}
+                </MenuItem>
+              }
+              title={"Confirmation"}
+              description={"Are you sure you want to delete this post ?"}
+              visible={isDeleteConfirmVisible}
+              onConfirmClick={handlePostDeletion}
+              onCloseClick={handleMenuClose}
+              loading={deleteLoading}
+            />
+          )
+        )}
       </Menu>
       <PostModal
         setVisible={setVisible}
@@ -430,8 +479,18 @@ const PostRatingArea = ({
   );
 };
 
-const InteractionMetrics = ({ numLikeds, numTexts, numShareds }) => {
+const InteractionMetrics = ({
+  likedCount,
+  sharedCount,
+  commentCount,
+  id: postId,
+}: PostState) => {
+  const dispatch = useAppDispatch();
   const [liked, setLiked] = React.useState(false);
+  const {
+    commentSessionOpen: { postId: currentCommentOpenPostId },
+    fetchingStatus,
+  }: CommentsState = useSelector((state: RootState) => state.commentsState);
 
   const toggleLike = () => setLiked(() => !liked);
 
@@ -464,19 +523,32 @@ const InteractionMetrics = ({ numLikeds, numTexts, numShareds }) => {
     }
   };
 
+  const handleModeCommentClick = async () => {
+    if (postId == currentCommentOpenPostId) {
+      dispatch(closeCommentSession());
+    } else {
+      await dispatch(fetchCommentsByPostID({ postId: postId }));
+      dispatch(openCommentSession({ postId: postId }));
+    }
+  };
+
   return (
     <div className={styles.interactionMetrics}>
       <div className={styles.metric}>
         <LikeIcon onClick={toggleLike} liked={liked} />
-        <Text css={{ fontSize: "small" }}>{showNum(numLikeds)}</Text>
+        <Text css={{ fontSize: "small" }}>{showNum(likedCount)}</Text>
       </div>
-      <div className={styles.metric}>
-        <ModeCommentOutlined />
-        <Text css={{ fontSize: "small" }}>{showNum(numTexts)}</Text>
+      <div className={styles.metric} onClick={handleModeCommentClick}>
+        {fetchingStatus == "pending" ? (
+          <AppButtonLoading color={"primary"} />
+        ) : (
+          <ModeCommentOutlined />
+        )}
+        <Text css={{ fontSize: "small" }}>{showNum(commentCount)}</Text>
       </div>
       <div className={styles.metric}>
         <ScreenShareOutlined />
-        <Text css={{ fontSize: "small" }}>{showNum(numShareds)}</Text>
+        <Text css={{ fontSize: "small" }}>{showNum(sharedCount)}</Text>
       </div>
       <div className={styles.metric}>
         <ShareOutlined />
@@ -493,7 +565,18 @@ const LikeIcon = ({ onClick, liked }) => {
   );
 };
 
-const CommentArea = ({ threadChats, avatar }) => {
+interface CommentAreaProps {
+  postProps: PostState;
+  avatar: string | null;
+}
+
+const CommentArea = ({ postProps, avatar }: CommentAreaProps) => {
+  const {
+    commentSessionOpen: { postId: currentCommentOpenPostId },
+    comments,
+    fetchingStatus,
+  }: CommentsState = useSelector((state: RootState) => state.commentsState);
+
   return (
     <div className={styles.commentArea}>
       <div className={styles.commentInput}>
@@ -504,43 +587,49 @@ const CommentArea = ({ threadChats, avatar }) => {
         />
         <Send cursor="pointer" htmlColor={appColors.primary} />
       </div>
-      <div className={styles.commentThreads}>
-        {threadChats.map((thread) => (
-          <CommentThread key={thread.id} {...thread} />
-        ))}
-      </div>
+      {currentCommentOpenPostId == postProps.id && (
+        <div className={styles.commentThreads}>
+          {comments.map((thread) => (
+            <CommentThread key={thread.id} {...thread} />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
-const CommentThread = (props) => {
-  const { main, replies } = props;
-  const { name, avatar, message, createdAt } = main;
+const CommentThread = (props: CommentDetailState) => {
+  const { owner, text, createdAt } = props;
+  const replies = [];
 
   return (
     <div className={styles.commentThread}>
-      <Avatar src={avatar} />
+      <Avatar src={owner.image} />
       <div className={styles.commentThreadColumn}>
         <div className={styles.comment}>
           <Text small css={{ fontWeight: "bold" }}>
-            {name}
+            {owner.username}
           </Text>
-          <Text small>{message}</Text>
+          <Text small>{text}</Text>
         </div>
         <div className={styles.commentInteraction}>
-          <Text size={12} css={{ cursor: "pointer" }}>
+          <Text size={11} css={{ cursor: "pointer" }}>
             Like
           </Text>
-          <Text size={12} css={{ cursor: "pointer" }}>
+          <Text size={11} css={{ cursor: "pointer" }}>
             Reply
           </Text>
-          <Text size={12}>10min</Text>
+          <Text size={11}>
+            {createdAt.toLocaleDateString().replaceAll("/", "-")}
+          </Text>
         </div>
-        <div className={styles.replies}>
-          {replies.map((reply) => (
-            <Comment key={reply.id} {...reply} />
-          ))}
-        </div>
+        {replies?.length > 0 && (
+          <div className={styles.replies}>
+            {replies.map((reply) => (
+              <Comment key={reply.id} {...reply} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

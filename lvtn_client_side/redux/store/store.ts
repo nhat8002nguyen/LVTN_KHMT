@@ -8,6 +8,8 @@ import {
 import { createWrapper, HYDRATE } from "next-redux-wrapper";
 import { useDispatch } from "react-redux";
 import authSliceReducer from "redux/slices/auth/authSlice";
+import commentsReducer from "redux/slices/home/comments/commentsSlice";
+import recommendUserList from "redux/slices/home/followableUsers/recommendUserListSlice";
 import postFormReducer from "redux/slices/home/posts/postFormSlice";
 import postListReducer from "redux/slices/home/posts/postListSlice";
 import snackbarsReducer from "redux/slices/statusNotifications/snackbarsSlice";
@@ -17,6 +19,8 @@ const combinedReducer = combineReducers({
   postList: postListReducer,
   postForm: postFormReducer,
   snackbar: snackbarsReducer,
+  recommendUserList: recommendUserList,
+  commentsState: commentsReducer,
 });
 
 const reducer = (

@@ -1,5 +1,6 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../../../store/store";
+import { PostDeletionState } from "./postFormSlice";
 import * as postListApi from "./postListAPI";
 import { PostListRequestDto } from "./postListAPI";
 import * as postsConverter from "./postsConverter";
@@ -28,9 +29,12 @@ export interface PostState {
 }
 
 export interface PostOwnerState {
+  id: number;
   username: string;
   image: string;
   email?: string;
+  shortBio: string | null;
+  createdAt: Date;
 }
 
 export interface ImageState {
@@ -54,7 +58,13 @@ const initialState: PostListState = {
 export const postListSlice = createSlice({
   name: "postList",
   initialState,
-  reducers: {},
+  reducers: {
+    deletePresentedPost(state, action: PayloadAction<PostDeletionState>) {
+      state.posts = state.posts.filter(
+        (post) => post.id != action.payload.postId
+      );
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(findNewsFeedPosts.pending, (state, action) => {
       state.loading = "loading";
@@ -75,6 +85,8 @@ export const findNewsFeedPosts = createAsyncThunk(
     return await postListApi.fetchNewsFeedOfUser(postList);
   }
 );
+
+export const { deletePresentedPost } = postListSlice.actions;
 
 export const selectPostListState = (state: RootState) => state.postList;
 
